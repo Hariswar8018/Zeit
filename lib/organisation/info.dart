@@ -3,12 +3,12 @@ import 'package:calendar_date_picker2/calendar_date_picker2.dart';
 import 'package:cloud_firestore/cloud_firestore.dart';
 import 'package:firebase_auth/firebase_auth.dart';
 import 'package:flutter/material.dart';
-import 'package:zeit/functions/flush.dart';
-import 'package:zeit/main.dart';
-import 'package:zeit/main_pages/navigation.dart';
-import 'package:zeit/model/organisation.dart';
-import 'package:zeit/model/usermodel.dart'  ;
-import 'package:zeit/provider/upload.dart';
+import 'package:zeitt/functions/flush.dart';
+import 'package:zeitt/main.dart';
+import 'package:zeitt/main_pages/navigation.dart';
+import 'package:zeitt/model/organisation.dart';
+import 'package:zeitt/model/usermodel.dart'  ;
+import 'package:zeitt/provider/upload.dart';
 import 'package:im_stepper/stepper.dart';
 import 'package:image_picker/image_picker.dart';
 import 'package:intl/intl.dart';
@@ -41,9 +41,7 @@ class _Step1State extends State<Step2> {
 
   @override
   Widget build(BuildContext context) {
-    return MaterialApp(
-      debugShowCheckedModeBanner: false,
-      home: Scaffold(
+    return  Scaffold(
         appBar: AppBar(
           backgroundColor: Color(0xff1491C7),
           title: Text("Make an Organisation",style:TextStyle(color:Colors.white,fontSize: 23)),
@@ -58,38 +56,43 @@ class _Step1State extends State<Step2> {
             ),
           ),
         ),
-        body: Padding(
-          padding: const EdgeInsets.all(8.0),
-          child: Column(
-            children: [
-              IconStepper(
-                icons: [
-                  Icon(Icons.face, color : activeStep == 0 ? Colors.white : Colors.black),
-                  Icon(Icons.work, color : activeStep == 1 ? Colors.white : Colors.black),
-                  Icon(Icons.info, color : activeStep == 2 ? Colors.white : Colors.black),
-                  Icon(Icons.phone_android, color : activeStep == 3 ? Colors.white : Colors.black),
-                ],
-                activeStep: activeStep,stepColor: Colors.grey.shade200, activeStepColor:Colors.blue ,
-                onStepReached: (index) {
-                  setState(() {
-                    activeStep = index;
-                  });
-                },
-              ),
-              header(),
-              s(context),
-              Spacer(),
-              Row(
+        body: SingleChildScrollView(
+          child: Padding(
+            padding: const EdgeInsets.all(8.0),
+            child: Column(
+              children: [
+                IconStepper(
+                  icons: [
+                    Icon(Icons.face, color : activeStep == 0 ? Colors.white : Colors.black),
+                    Icon(Icons.work, color : activeStep == 1 ? Colors.white : Colors.black),
+                    Icon(Icons.info, color : activeStep == 2 ? Colors.white : Colors.black),
+                    Icon(Icons.phone_android, color : activeStep == 3 ? Colors.white : Colors.black),
+                  ],
+                  activeStep: activeStep,stepColor: Colors.grey.shade200, activeStepColor:Colors.blue ,
+                  onStepReached: (index) {
+                    setState(() {
+                      activeStep = index;
+                    });
+                  },
+                ),
+                header(),
+                s(context),
+              ],
+            ),
+          ),
+        ),
+          persistentFooterButtons:[
+            Container(
+              height: 70,
+              child: Row(
                 mainAxisAlignment: MainAxisAlignment.spaceBetween,
                 children: [
                   previousButton(),
                   nextButton(),
                 ],
               ),
-            ],
-          ),
-        ),
-      ),
+            ),
+          ]
     );
   }
 
@@ -125,12 +128,11 @@ class _Step1State extends State<Step2> {
                 hr: [], subadmin: [],
                 phone: phone.text, email: email.text,
                 address: address.text, incor: uid.text, bday: _singleDatePickerValueWithDefaultValue[0].toString(), pic1: '',
-                people: [hk], desc: '', labourlink: '', comcases: '', compolicy: '', lawname: '', lawphone: '', lawemail: '', status: 'Waiting for Approval', 
+                people: [hk], desc: '', labourlink: '', comcases: '', compolicy: '', lawname: '', lawphone: '', lawemail: '', status: 'Approved',
                 c1: 0.0, c2: 0.0, c3: 0.0, c4: 0.0, c6: 0.0, c5: 0.0,
                 c7: 0.0, c8: 0.0, c9: 0.0, c10: 0.0, c11: 0.0, c12: 0.0, budget: 0.0, lat: 22.9, long: 23.97,
             );
             await FirebaseFirestore.instance.collection("Users").doc(hk).update({
-              "type" : 'Organisation',
               "source":hk,
             });
             await usersCollection.doc(hk).set(h.toJson());

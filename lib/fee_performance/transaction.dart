@@ -7,13 +7,14 @@ import 'package:intl/intl.dart';
 import 'package:page_transition/page_transition.dart';
 import 'package:provider/provider.dart';
 import 'package:social_login_buttons/social_login_buttons.dart';
-import 'package:zeit/cards/usercards.dart';
-import 'package:zeit/fee_performance/pdf_statement.dart';
-import 'package:zeit/functions/task_health_events_training.dart';
-import 'package:zeit/model/organisation.dart';
-import 'package:zeit/model/pay.dart';
-import 'package:zeit/model/usermodel.dart';
-import 'package:zeit/provider/declare.dart';
+import 'package:zeitt/cards/usercards.dart';
+import 'package:zeitt/fee_performance/pdf_statement.dart';
+import 'package:zeitt/fee_performance/update_bank.dart';
+import 'package:zeitt/functions/task_health_events_training.dart';
+import 'package:zeitt/model/organisation.dart';
+import 'package:zeitt/model/pay.dart';
+import 'package:zeitt/model/usermodel.dart';
+import 'package:zeitt/provider/declare.dart';
 
 class Transactionn extends StatefulWidget {
   String id;
@@ -267,8 +268,8 @@ class Per extends StatelessWidget {
                         SizedBox(
                           height: 10,
                         ),
-                        as(3,context,Icon(Icons.now_wallpaper_sharp),"Download as PDF","See the Report Now as PDF",true),
-                        as(4,context,Icon(Icons.download_done_outlined),"Download as JPEG","Download the Report",true),
+                        as(3,context,Icon(Icons.now_wallpaper_sharp,color: Colors.green,),"Download as PDF","See the Report Now as PDF",true),
+                        as(4,context,Icon(Icons.download_done_outlined,color: Colors.red,),"Download as JPEG","Download the Report",true),
                         SizedBox(height:10)
                       ],
                     ),
@@ -322,12 +323,12 @@ class Per extends StatelessWidget {
                         SizedBox(
                           height: 10,
                         ),
-                        as(0,context,Icon(Icons.no_food_rounded),"Mark Unpaid","Mark the Payroll Unpaid",true),
-                        user.status=="PAID"?as(5,context,Icon(Icons.fastfood_outlined),"Mark Waiting","Mark still Waiting to Pay",true):
-                        as(1,context,Icon(Icons.fastfood_outlined),"Mark Paid","Mark the Payroll Paid",true),
-                        as(2,context,Icon(Icons.person),"View User","View the Employee Account",true),
-                        as(3,context,Icon(Icons.now_wallpaper_sharp),"See the Report","See the Report Now",true),
-                        as(4,context,Icon(Icons.download_done_outlined),"Download Report","Download the Report",true),
+                        as(0,context,Icon(Icons.no_food_rounded,color: Colors.deepPurpleAccent,),"Mark Unpaid","Mark the Payroll Unpaid",true),
+                        user.status=="PAID"?as(5,context,Icon(Icons.fastfood_outlined,color: Colors.pink,),"Mark Waiting","Mark still Waiting to Pay",true):
+                        as(1,context,Icon(Icons.fastfood_outlined,color: Colors.purple,),"Mark Paid","Mark the Payroll Paid",true),
+                        as(2,context,Icon(Icons.person,color: Colors.indigo,),"View User","View the Employee Account",true),
+                        as(5,context,Icon(Icons.account_balance,color: Colors.red,),"View User Bank Account","View the Employee Bank Account to transfer",true),
+                        as(4,context,Icon(Icons.download_done_outlined,color: Colors.cyan,),"Download Report","Download the Report",true),
                         SizedBox(height:10)
                       ],
                     ),
@@ -360,11 +361,8 @@ class Per extends StatelessWidget {
     // Convert millisecondsSinceEpoch to DateTime
     try {
       int ik = int.parse(milliseconds);
-      DateTime dateTime = DateTime.fromMillisecondsSinceEpoch(ik);
-
-      // Format the DateTime to show only the date (e.g., "dd/MM/yyyy")
+      DateTime dateTime = DateTime.fromMicrosecondsSinceEpoch(ik);
       String formattedDate = DateFormat('dd/MM/yyyy').format(dateTime);
-
       return formattedDate;
     }catch(e){
       return "Long Time Ago";
@@ -477,6 +475,30 @@ class Per extends StatelessWidget {
         return null;
       }
 
+    }else if(i==5){
+      try {
+        // Reference to the 'users' collection
+        CollectionReference usersCollection = FirebaseFirestore.instance.collection('Users');
+        // Query the collection based on uid
+        QuerySnapshot querySnapshot = await usersCollection.where('uid', isEqualTo: user.type).get();
+        // Check if a document with the given uid exists
+        if (querySnapshot.docs.isNotEmpty) {
+          // Convert the document snapshot to a UserModel
+          UserModel user = UserModel.fromSnap(querySnapshot.docs.first);
+          Navigator.push(
+              context,
+              PageTransition(
+                  child: BankSee(user: user,),
+                  type: PageTransitionType.rightToLeft,
+                  duration: Duration(milliseconds: 600)));
+        } else {
+          // No document found with the given uid
+          print("No fhgh");
+        }
+      } catch (e) {
+        print("Error fetching user by uid: $e");
+        return null;
+      }
     }else{
       await  FirebaseFirestore.instance.collection("Company")
           .doc(id).collection("Payroll")

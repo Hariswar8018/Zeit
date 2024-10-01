@@ -1,9 +1,9 @@
 import 'package:flutter/material.dart';
 import 'package:flutter_svg/svg.dart';
 import 'package:page_transition/page_transition.dart';
-import 'package:zeit/model/organisation.dart';
+import 'package:zeitt/model/organisation.dart';
 import 'package:url_launcher/url_launcher.dart';
-import 'package:zeit/update/update_user.dart';
+import 'package:zeitt/update/update_user.dart';
 
 class LabourLaws extends StatefulWidget {
    LabourLaws({super.key,required this.user,required this.hr});

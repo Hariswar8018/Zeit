@@ -1,6 +1,6 @@
 import 'package:flutter/material.dart';
 import 'package:intl/intl.dart';
-import 'package:zeit/model/emp_history.dart';
+import 'package:zeitt/model/emp_history.dart';
 
 class Emphistory extends StatelessWidget {
   EmploymentHistory user ;

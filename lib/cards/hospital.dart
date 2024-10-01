@@ -1,13 +1,15 @@
+import 'package:add_2_calendar/add_2_calendar.dart';
 import 'package:cloud_firestore/cloud_firestore.dart';
 import 'package:firebase_auth/firebase_auth.dart';
 import 'package:flutter/material.dart';
+import 'package:intl/intl.dart';
 import 'package:page_transition/page_transition.dart';
 import 'package:provider/provider.dart';
 import 'package:social_login_buttons/social_login_buttons.dart';
-import 'package:zeit/functions/search.dart';
-import 'package:zeit/model/hospital.dart';
-import 'package:zeit/model/usermodel.dart';
-import 'package:zeit/provider/declare.dart';
+import 'package:zeitt/functions/search.dart';
+import 'package:zeitt/model/hospital.dart';
+import 'package:zeitt/model/usermodel.dart';
+import 'package:zeitt/provider/declare.dart';
 
 import '../model/events.dart';
 

@@ -4,7 +4,7 @@ import 'package:firebase_auth/firebase_auth.dart';
 import 'package:flutter/material.dart';
 import 'package:intl/intl.dart';
 import 'package:social_login_buttons/social_login_buttons.dart';
-import 'package:zeit/model/emp_history.dart';
+import 'package:zeitt/model/emp_history.dart';
 class EmploymentHistoryForm extends StatefulWidget {
   @override
   _EmploymentHistoryFormState createState() => _EmploymentHistoryFormState();
@@ -18,7 +18,7 @@ class _EmploymentHistoryFormState extends State<EmploymentHistoryForm> {
   TextEditingController time2Controller = TextEditingController();
   final TextEditingController descriptionController = TextEditingController();
   final TextEditingController logoController = TextEditingController();
-  bool zeit = false;
+  bool zeitt = false;
   final TextEditingController locationTypeController = TextEditingController();
 
   Widget ad(String str, TextEditingController c, {bool isMultiLine = false}) {
@@ -58,7 +58,7 @@ class _EmploymentHistoryFormState extends State<EmploymentHistoryForm> {
       time2: time2Controller.text,
       description: descriptionController.text,
       logo: logoController.text,
-      zeit: zeit,
+      zeit: zeitt,
       locationType: locationTypeController.text,
     );
 
@@ -104,14 +104,14 @@ class _EmploymentHistoryFormState extends State<EmploymentHistoryForm> {
             Row(
               children: [
                 Checkbox(
-                  value: zeit,
+                  value: zeitt,
                   onChanged: (bool? value) {
                     setState(() {
-                      zeit = value!;
+                      zeitt = value!;
                     });
                   },
                 ),
-                Text('I got my Job with Zeit'),
+                Text('I got my Job with zeitt'),
               ],
             ),
             ad("Location type",locationTypeController),
@@ -135,6 +135,7 @@ class _EmploymentHistoryFormState extends State<EmploymentHistoryForm> {
       ],
     );
   }
+
   _buildCalendarDialogButton() {
     const dayTextStyle =  TextStyle(color: Colors.black, fontWeight: FontWeight.w700);
     final weekendTextStyle =

@@ -1,7 +1,12 @@
 import 'package:cloud_firestore/cloud_firestore.dart';
 import 'package:flutter/material.dart';
 import 'package:dropdown_button2/dropdown_button2.dart';
-import 'package:zeit/fee_performance/new_expense.dart';
+import 'package:page_transition/page_transition.dart';
+import 'package:provider/provider.dart';
+import 'package:zeitt/fee_performance/new_expense.dart';
+import 'package:zeitt/model/usermodel.dart';
+
+import '../provider/declare.dart';
 
 class ExpenseScreen extends StatefulWidget {
 String id;
@@ -225,10 +230,26 @@ class Cha extends StatelessWidget {
   Widget build(BuildContext context) {
     return Card(
       color: Colors.white,
-      child: ListTile(
-        title: Text(user.name,style:TextStyle(fontSize: 18,fontWeight: FontWeight.w700)),
-        subtitle:  Text(user.explanation,style:TextStyle(fontSize: 16,fontWeight: FontWeight.w400)),
-        trailing: Text("- "+user.cost.toString(),style:TextStyle(fontSize: 15,fontWeight: FontWeight.w900,color: Colors.red),),
+      child: Column(
+        children: [
+          ListTile(
+            title: Text(user.name,style:TextStyle(fontSize: 18,fontWeight: FontWeight.w700)),
+            subtitle:  Text(user.explanation,style:TextStyle(fontSize: 16,fontWeight: FontWeight.w400)),
+            trailing: Text("- "+user.cost.toString(),style:TextStyle(fontSize: 15,fontWeight: FontWeight.w900,color: Colors.red),),
+          ),
+          user.stname.isNotEmpty?Padding(
+            padding: const EdgeInsets.all(8.0),
+            child: Row(
+              children: [
+                CircleAvatar(
+                  backgroundImage: NetworkImage(user.stpic),
+                  radius: 10,
+                ),
+                Text(" Reimbursed to "+user.stname)
+              ],
+            ),
+          ):SizedBox()
+        ],
       ),
     );
   }

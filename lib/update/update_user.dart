@@ -7,15 +7,16 @@ import 'package:flutter/services.dart';
 import 'package:flutter_svg/flutter_svg.dart';
 import 'package:page_transition/page_transition.dart';
 import 'package:provider/provider.dart';
-import 'package:zeit/cards/usercards.dart';
-import 'package:zeit/first/login.dart';
+import 'package:zeitt/cards/usercards.dart';
+import 'package:zeitt/first/login.dart';
 import 'package:firebase_core/firebase_core.dart';
-import 'package:zeit/firebase_options.dart';
-import 'package:zeit/first/onboarding.dart';
-import 'package:zeit/functions/search.dart';
-import 'package:zeit/main_pages/navigation.dart';
-import 'package:zeit/model/usermodel.dart';
-import 'package:zeit/provider/declare.dart';
+import 'package:zeitt/firebase_options.dart';
+import 'package:zeitt/first/onboarding.dart';
+import 'package:zeitt/functions/flush.dart';
+import 'package:zeitt/functions/search.dart';
+import 'package:zeitt/main_pages/navigation.dart';
+import 'package:zeitt/model/usermodel.dart';
+import 'package:zeitt/provider/declare.dart';
 
 class Update extends StatefulWidget {
   String Firebasevalue;
@@ -115,36 +116,10 @@ class _UpdateState extends State<Update> {
                                     "${widget.Firebasevalue}": s,
                                   });
                                 }
-                                
-                                ScaffoldMessenger.of(context).showSnackBar(
-                                  SnackBar(
-                                    content: Text('Yup ! You had change your ${widget.Name}'),
-                                    duration: Duration(seconds: 2), // Duration for how long the Snackbar will be visible
-                                    action: SnackBarAction(
-                                      label: 'Close',
-                                      onPressed: () {
-                                        // Add your action here
-                                        ScaffoldMessenger.of(context).hideCurrentSnackBar(); // Hides the current Snackbar
-                                      },
-                                    ),
-                                  ),
-                                );
-                                Navigator.of(context).pop();
+                                Send.message(context, "Yup ! You had change your ${widget.Name}", true);
                               }
                               catch(e){
-                                ScaffoldMessenger.of(context).showSnackBar(
-                                  SnackBar(
-                                    content: Text("${e}"),
-                                    duration: Duration(seconds: 2), // Duration for how long the Snackbar will be visible
-                                    action: SnackBarAction(
-                                      label: 'Close',
-                                      onPressed: () {
-                                        // Add your action here
-                                        ScaffoldMessenger.of(context).hideCurrentSnackBar(); // Hides the current Snackbar
-                                      },
-                                    ),
-                                  ),
-                                );
+                                Send.message(context, "$e", false);
                               }
                             },
                             icon: Icon(Icons.update, color: Colors.black),

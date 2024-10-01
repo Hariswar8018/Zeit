@@ -8,12 +8,15 @@ import 'package:page_transition/page_transition.dart';
 import 'package:provider/provider.dart';
 import 'package:social_login_buttons/social_login_buttons.dart';
 import 'package:url_launcher/url_launcher.dart';
-import 'package:zeit/cards/usercards.dart';
-import 'package:zeit/functions/google_map_check-in_out.dart';
-import 'package:zeit/functions/search.dart';
-import 'package:zeit/model/feeds.dart';
-import 'package:zeit/provider/declare.dart';
-import 'package:zeit/update/update_user.dart';
+import 'package:zeitt/cards/usercards.dart';
+import 'package:zeitt/functions/flush.dart';
+import 'package:zeitt/functions/google_map_check-in_out.dart';
+import 'package:zeitt/functions/search.dart';
+import 'package:zeitt/model/feeds.dart';
+import 'package:zeitt/notification/notify_all.dart';
+import 'package:zeitt/provider/declare.dart';
+import 'package:zeitt/superadmin/addemployee.dart';
+import 'package:zeitt/update/update_user.dart';
 import '../model/usermodel.dart';
 import '../model/organisation.dart';
 import 'FeedsU.dart';
@@ -22,11 +25,11 @@ import 'package:calendar_date_picker2/calendar_date_picker2.dart';
 import 'package:cloud_firestore/cloud_firestore.dart';
 import 'package:firebase_auth/firebase_auth.dart';
 import 'package:flutter/material.dart';
-import 'package:zeit/main.dart';
-import 'package:zeit/main_pages/navigation.dart';
-import 'package:zeit/model/organisation.dart';
-import 'package:zeit/model/usermodel.dart'  ;
-import 'package:zeit/provider/upload.dart';
+import 'package:zeitt/main.dart';
+import 'package:zeitt/main_pages/navigation.dart';
+import 'package:zeitt/model/organisation.dart';
+import 'package:zeitt/model/usermodel.dart'  ;
+import 'package:zeitt/provider/upload.dart';
 import 'package:im_stepper/stepper.dart';
 import 'package:image_picker/image_picker.dart';
 import 'package:intl/intl.dart';
@@ -44,13 +47,10 @@ class ProO extends StatefulWidget {
 class _ProOState extends State<ProO> {
   int active=0;
   bool myuser(){
-    String gh = FirebaseAuth.instance.currentUser!.uid;
-    if(widget.user.admin.contains(gh)){
-      return true;
-    }else{
-      return false;
-    }
+    UserModel? _user = Provider.of<UserProvider>(context,listen: false).getUser;
+    return ishr(_user!);
   }
+
   pickImage(ImageSource source) async {
     final ImagePicker _imagePicker = ImagePicker();
     XFile? _file = await _imagePicker.pickImage(source: source);
@@ -59,10 +59,17 @@ class _ProOState extends State<ProO> {
     }
     print('No Image Selected');
   }
-
+  bool ishr(UserModel user){
+    if(user.type=="Individual"){
+      return false;
+    }else{
+      return true;
+    }
+  }
   @override
   Widget build(BuildContext context) {
     double ww =  MediaQuery.of(context).size.width ;
+    UserModel? _user = Provider.of<UserProvider>(context).getUser;
     return Scaffold(
       extendBodyBehindAppBar: true,
       appBar: AppBar(
@@ -107,7 +114,7 @@ class _ProOState extends State<ProO> {
                           if (file != null) {
                             String photoUrl = await StorageMethods().uploadImageToStorage(
                                 'Company', file, true);
-                            await FirebaseFirestore.instance.collection("Company").doc(widget.user.uid).update({
+                            await FirebaseFirestore.instance.collection("Company").doc(widget.user.id).update({
                               "pic1":photoUrl,
                             });
                           }
@@ -173,7 +180,7 @@ class _ProOState extends State<ProO> {
                                 myuser()?IconButton(icon:Icon(Icons.edit,size: 23,color: Colors.green,),onPressed:(){
                                   Navigator.push(
                                       context, PageTransition(
-                                      child: Update(Name: 'Small Description', doc: widget.user.uid, Firebasevalue: 'desc', Collection: 'Company', ), type: PageTransitionType.rightToLeft, duration: Duration(milliseconds: 200)
+                                      child: Update(Name: 'Small Description', doc: widget.user.id, Firebasevalue: 'desc', Collection: 'Company', ), type: PageTransitionType.rightToLeft, duration: Duration(milliseconds: 200)
                                   ));
                                 }):SizedBox(),
                               ],
@@ -192,7 +199,7 @@ class _ProOState extends State<ProO> {
                 myuser()?IconButton(icon:Icon(Icons.edit,size: 23,color: Colors.green,),onPressed:(){
                   Navigator.push(
                       context, PageTransition(
-                      child: Update(Name: "Phone", doc: widget.user.uid, Firebasevalue: 'phone', Collection: 'Company', ), type: PageTransitionType.rightToLeft, duration: Duration(milliseconds: 200)
+                      child: Update(Name: "Phone", doc: widget.user.id, Firebasevalue: 'phone', Collection: 'Company', ), type: PageTransitionType.rightToLeft, duration: Duration(milliseconds: 200)
                   ));
                 }):SizedBox(),
               ],
@@ -203,7 +210,7 @@ class _ProOState extends State<ProO> {
                 myuser()?IconButton(icon:Icon(Icons.edit,size: 23,color: Colors.green,),onPressed:(){
                   Navigator.push(
                       context, PageTransition(
-                      child: Update(Name: 'Email', doc: widget.user.uid, Firebasevalue: 'email', Collection: 'Company', ), type: PageTransitionType.rightToLeft, duration: Duration(milliseconds: 200)
+                      child: Update(Name: 'Email', doc: widget.user.id, Firebasevalue: 'email', Collection: 'Company', ), type: PageTransitionType.rightToLeft, duration: Duration(milliseconds: 200)
                   ));
                 }):SizedBox(),
               ],
@@ -220,7 +227,7 @@ class _ProOState extends State<ProO> {
                 height: 35, width: MediaQuery.of(context).size.width,
                 child: ListView.builder(
                   physics: ScrollPhysics(),
-                  itemCount: 4,scrollDirection: Axis.horizontal,
+                  itemCount: 5,scrollDirection: Axis.horizontal,
                   itemBuilder: (BuildContext context, int qIndex) {
                     return InkWell(
                       onTap: (){
@@ -319,13 +326,16 @@ class _ProOState extends State<ProO> {
     if(active==0){
       return r3();
     }else if(active == 1){
-      return r2(true);
+      return r2(true,"Individual");
     }else if( active == 2){
-      return r2(false);
+      return r2(false,"Organisation");
+    }else if( active == 3){
+      return r2(false,"Director");
     }else{
       return r1();
     }
   }
+
   Widget r1(){
     return Column(
       children: [
@@ -375,14 +385,14 @@ class _ProOState extends State<ProO> {
         ):SizedBox(),
         r( Icon(Icons.calendar_month, color : Colors.red),"Date of Est. : " + widget.user.bday),
         r( Icon(Icons.business, color : Colors.blue),"Incor. Id : " + widget.user.uid),
-        r( Icon(Icons.important_devices, color : Colors.green),"Company Id : " + widget.user.uid),
+        r( Icon(Icons.important_devices, color : Colors.green),"Company Id : " + widget.user.id),
         Row(
           children: [
             r( Icon(Icons.money, color : Colors.orange),"Pan Card : " + widget.user.pan),
             myuser()?IconButton(icon:Icon(Icons.edit,size: 23,color: Colors.green,),onPressed:(){
               Navigator.push(
                   context, PageTransition(
-                  child: Update(Name: 'Pan Card', doc: widget.user.uid, Firebasevalue: 'pan', Collection: 'Company', ), type: PageTransitionType.rightToLeft, duration: Duration(milliseconds: 200)
+                  child: Update(Name: 'Pan Card', doc: widget.user.id, Firebasevalue: 'pan', Collection: 'Company', ), type: PageTransitionType.rightToLeft, duration: Duration(milliseconds: 200)
               ));
             }):SizedBox(),
           ],
@@ -393,7 +403,7 @@ class _ProOState extends State<ProO> {
             myuser()?IconButton(icon:Icon(Icons.edit,size: 23,color: Colors.green,),onPressed:(){
               Navigator.push(
                   context, PageTransition(
-                  child: Update(Name: 'Tan Card', doc: widget.user.uid, Firebasevalue: 'tan', Collection: 'Company', ), type: PageTransitionType.rightToLeft, duration: Duration(milliseconds: 200)
+                  child: Update(Name: 'Tan Card', doc: widget.user.id, Firebasevalue: 'tan', Collection: 'Company', ), type: PageTransitionType.rightToLeft, duration: Duration(milliseconds: 200)
               ));
             }):SizedBox(),
           ],
@@ -403,46 +413,50 @@ class _ProOState extends State<ProO> {
     );
   }
 
-  Widget r2(bool b ){
+  Widget r2(bool b,String find ){
+    UserModel? _user = Provider.of<UserProvider>(context,listen: false).getUser;
     List<UserModel> _list = [];
     return Column(
       children: [
-        Padding(
+        ishr(_user!)?Padding(
           padding: const EdgeInsets.all(8.0),
-          child: Container(
-            width: MediaQuery.of(context).size.width,
-            height: 40,decoration: BoxDecoration(
-            color: Colors.yellow,
-            borderRadius: BorderRadius.circular(8)
-          ),
-            child: Row(
-              children: [
-                SizedBox(width: 10,),
-                Text(b?"Add Employees":"Add Admins",style: TextStyle(fontWeight: FontWeight.w800),),
-                Spacer(),
-                InkWell(
-                  onTap: (){
-                    opeen(b);
-                  },
-                  child: CircleAvatar(
+          child: InkWell(
+            onTap: (){
+              Navigator.push(
+                  context,
+                  PageTransition(
+                      child: Addemployee(user: widget.user,name:b?"Employee":(find=="Director"?"Director":"Organisation"),type: find,),
+                      type: PageTransitionType.leftToRight,
+                      duration: Duration(milliseconds:40)));
+            },
+            child: Container(
+              width: MediaQuery.of(context).size.width,
+              height: 40,decoration: BoxDecoration(
+              color: Colors.yellow,
+              borderRadius: BorderRadius.circular(8)
+            ),
+              child: Row(
+                children: [
+                  SizedBox(width: 10,),
+                  Text(b?"Add Employees":"Add Admins",style: TextStyle(fontWeight: FontWeight.w800),),
+                  Spacer(),
+                  CircleAvatar(
                     radius: 15,
                       backgroundColor: Colors.blue,
                       child: Icon(Icons.add,size: 20,)),
-                ),
-                SizedBox(width: 10,),
-              ],
+                  SizedBox(width: 10,),
+                ],
+              ),
             ),
           ),
-        ),
+        ):SizedBox(),
         Container(
           width: MediaQuery.of(context).size.width,
-            height: 800,
+            height:600,
             child:  StreamBuilder(
-          stream: b ? FirebaseFirestore.instance
-              .collection('Users').where("source",isEqualTo: widget.user.id)
-              .snapshots(): FirebaseFirestore.instance
-              .collection('Users').where("admin",arrayContains: widget.user.id)
-              .snapshots()  ,
+          stream:  FirebaseFirestore.instance
+              .collection('Users').where("source",isEqualTo: widget.user.id).where("type",isEqualTo: find)
+              .snapshots(),
           builder: (context, snapshot) {
             if (snapshot.connectionState == ConnectionState.waiting) {
               return Center(child: CircularProgressIndicator());
@@ -458,7 +472,7 @@ class _ProOState extends State<ProO> {
                   mainAxisAlignment: MainAxisAlignment.center,
                   children: [
                     Text(
-                      "No Employees found",
+                      "No Peers found",
                       style: TextStyle(fontSize: 22, fontWeight: FontWeight.w600),
                     ),
                     Text(
@@ -470,11 +484,9 @@ class _ProOState extends State<ProO> {
                 ),
               );
             }
-
             final data = snapshot.data?.docs;
             _list.clear();
             _list.addAll(data?.map((e) => UserModel.fromJson(e.data())).toList() ?? []);
-
             return GridView.builder(
               itemCount: _list.length,
               padding: EdgeInsets.only(top: 10),
@@ -562,23 +574,25 @@ class _ProOState extends State<ProO> {
         )
     );
   }
+
   String ga(int i){
     if ( i == 0 ){
       return "Posts";
     }else if ( i == 1){
       return "Employee";
     }else if ( i == 2){
-      return "Managment";
+      return "HR";
     }else if ( i == 3){
-      return "About";
+      return "Director";
     }else if ( i == 4){
-      return "Files";
+      return "About";
     }else if ( i == 5){
       return "Travel Requests";
     }else {
       return "None";
     }
   }
+
   Widget ayu(int i ){
     return Text(ga(i), style: TextStyle(fontSize: 17, fontWeight: FontWeight.w600,color :active ==i? Colors.black:Colors.grey.shade500),);
   }
@@ -596,234 +610,6 @@ class _ProOState extends State<ProO> {
               fontSize: 14, color: Colors.grey.shade800),),
         ],
       ),
-    );
-  }
-  void opeen(bool b) {
-    TextEditingController c = TextEditingController();
-    showModalBottomSheet<void>(
-      context: context,
-      builder: (BuildContext context) {
-        return SizedBox(
-          height: 280,
-          child: Center(
-            child: Column(
-              mainAxisAlignment: MainAxisAlignment.start,
-              crossAxisAlignment: CrossAxisAlignment.center,
-              children: <Widget>[
-                SizedBox(height: 15),
-                Container(
-                  width: 80, height: 10,
-                  decoration: BoxDecoration(
-                      color: Colors.blueAccent,
-                      borderRadius: BorderRadius.circular(20)
-                  ),
-                ),
-                SizedBox(height: 15),
-                Text(textAlign: TextAlign.center,
-                   b? "Add Employee ID":"Add Company Admins",
-                    style: TextStyle(
-                        fontWeight: FontWeight.w700, fontSize: 20)),
-                SizedBox(height: 9),
-                SizedBox(height: 9),
-                Text(textAlign: TextAlign.center,
-                    "Add Employee ID here to add it to your Organisation, and Invite them to our App",
-                    style: TextStyle(
-                        fontWeight: FontWeight.w400, fontSize: 18)),
-                SizedBox(height: 14),
-                Padding(
-                  padding: const EdgeInsets.all(10.0),
-                  child: TextFormField(
-                    controller: c,
-                    keyboardType: TextInputType.name,
-                    decoration: InputDecoration(
-                      labelText: ' Enter Employee ID',
-                      isDense: true,
-                      suffixIconColor: Colors.blueAccent,
-                      border: OutlineInputBorder(
-                        borderRadius: BorderRadius.circular(8.0), // Adjust the value as needed
-                      ),
-                    ),
-                    validator: (value) {
-                      if (value!.isEmpty) {
-                        return 'Please enter your name';
-                      }
-                      return null;
-                    },
-                  ),
-                ),
-                Padding(
-                  padding: const EdgeInsets.only(left:18.0,right:18,top:10),
-                  child: SocialLoginButton(
-                    backgroundColor:!(c.text.length>=12)?Colors.grey: Color(0xff6001FF),
-                    height: 40,
-                    text: 'Find Employee',
-                    borderRadius: 20,
-                    fontSize: 21,
-                    buttonType: SocialLoginButtonType.generalLogin,
-                    onPressed: () async {
-                      String s1 = c.text;
-                      String s3=s1.substring(0,4);
-                      String s4=s1.substring(4);
-                      if(s3!="ZEIT"){
-                        print("Wrong ID");
-                      }else{
-                        try {
-                          // Reference to the 'users' collection
-                          CollectionReference usersCollection = FirebaseFirestore.instance.collection('Users');
-
-                          // Query the collection based on uid
-                          QuerySnapshot querySnapshot = await usersCollection.where('uid', isEqualTo: s4).get();
-
-                          // Check if a document with the given uid exists
-                          if (querySnapshot.docs.isNotEmpty) {
-                            // Convert the document snapshot to a UserModel
-                            UserModel user = UserModel.fromSnap(querySnapshot.docs.first);
-                            print(user);
-                            Navigator.pop(context);
-                            confirm(user,b);
-                          } else {
-                            ScaffoldMessenger.of(context).showSnackBar(
-                              SnackBar(
-                                content: Text('No User found !'),
-                              ),
-                            );
-                            Navigator.pop(context);
-                          }
-                        } catch (e) {
-                          ScaffoldMessenger.of(context).showSnackBar(
-                            SnackBar(
-                              content: Text('${e}'),
-                            ),
-                          );
-                          Navigator.pop(context);
-                        }
-                      }
-                    },
-                  ),
-                ),
-              ],
-            ),
-          ),
-        );
-      },
-    );
-
-  }
-  void confirm(UserModel user1,bool b){
-    showModalBottomSheet<void>(
-      context: context,
-      builder: (BuildContext context) {
-        return SizedBox(
-          height: 360,
-          child: Center(
-            child: Column(
-              mainAxisAlignment: MainAxisAlignment.start,
-              crossAxisAlignment: CrossAxisAlignment.center,
-              children: <Widget>[
-                SizedBox(height: 15),
-                Container(
-                  width: 80, height: 10,
-                  decoration: BoxDecoration(
-                      color: Colors.blueAccent,
-                      borderRadius: BorderRadius.circular(20)
-                  ),
-                ),
-                SizedBox(height: 15),
-                Text(textAlign: TextAlign.center,
-                    b? "Confirm the User":"Confirm the Admin",
-                    style: TextStyle(
-                        fontWeight: FontWeight.w700, fontSize: 20)),
-                SizedBox(height: 9),
-                Text(textAlign: TextAlign.center,
-                    "We found out this User ! Please check is it Correct? By clicking Yes, The User will be added to the Company.",
-                    style: TextStyle(
-                        fontWeight: FontWeight.w400, fontSize: 18)),
-                SizedBox(height: 14),
-                Padding(
-                  padding: const EdgeInsets.all(8.0),
-                  child: Container(
-                      width: MediaQuery.of(context).size.width,
-                      decoration: BoxDecoration(
-                        color: Colors.white,
-                        borderRadius: BorderRadius.circular(20),
-                      ),
-                      child: Padding(
-                        padding: const EdgeInsets.all(12.0),
-                        child: ListTile(
-                          leading: CircleAvatar(
-                            backgroundImage: NetworkImage(user1.pic),
-                            radius: 25,
-                          ),
-                          title: Text(user1.Name,style :TextStyle(fontWeight: FontWeight.w800,fontSize: 18)),
-                          subtitle: Text(user1.education,style :TextStyle(fontWeight: FontWeight.w800,)),
-                          trailing:Icon(Icons.work,color:Colors.red,size: 25,),
-                        ),
-                      )),
-                ),
-                Padding(
-                  padding: const EdgeInsets.only(left:18.0,right:18,top:10),
-                  child: SocialLoginButton(
-                    backgroundColor: Color(0xff6001FF),
-                    height: 40,
-                    text: 'Yes ! this is the User',
-                    borderRadius: 20,
-                    fontSize: 21,
-                    buttonType: SocialLoginButtonType.generalLogin,
-                    onPressed: () async {
-                      if(user1.source.isEmpty){
-                          await FirebaseFirestore.instance.collection("Users")
-                              .doc(user1.uid)
-                              .update({
-                            "type": 'Individual',
-                            "source": widget.user.uid,
-                          });
-                          await FirebaseFirestore.instance.collection("Company")
-                              .doc(widget.user.uid)
-                              .update({
-                            "people": FieldValue.arrayUnion([user1.uid]),
-                          });
-                        Navigator.pop(context);
-                        ScaffoldMessenger.of(context).showSnackBar(
-                          SnackBar(
-                            content: Text('Added'),
-                          ),
-                        );
-                      }else if(!b){
-                        await FirebaseFirestore.instance.collection("Company")
-                            .doc(widget.user.uid)
-                            .update({
-                          "admin": FieldValue.arrayUnion([user1.uid]),
-                          "people": FieldValue.arrayUnion([user1.uid]),
-                        });
-                        await FirebaseFirestore.instance.collection("Users")
-                            .doc(user1.uid)
-                            .update({
-                          "type": 'Organisation',
-                          "source": widget.user.uid,
-                          "admin": FieldValue.arrayUnion([widget.user.uid]),
-                        });
-                        Navigator.pop(context);
-                        ScaffoldMessenger.of(context).showSnackBar(
-                          SnackBar(
-                            content: Text('Added'),
-                          ),
-                        );
-                      }else{
-                        Navigator.pop(context);
-                        ScaffoldMessenger.of(context).showSnackBar(
-                          SnackBar(
-                            content: Text('The Employee is already added to a Company ! Please remove it first'),
-                          ),
-                        );
-                      }
-                    },
-                  ),
-                ),
-              ],
-            ),
-          ),
-        );
-      },
     );
   }
 }

@@ -3,9 +3,9 @@ import 'package:firebase_auth/firebase_auth.dart';
 import 'package:flutter/material.dart';
 import 'package:intl/intl.dart';
 import 'package:provider/provider.dart';
-import 'package:zeit/model/usermodel.dart';
+import 'package:zeitt/model/usermodel.dart';
 import 'package:page_transition/page_transition.dart';
-import 'package:zeit/notification/notify_all.dart';
+import 'package:zeitt/notification/notify_all.dart';
 import '../model/feeds.dart';
 import '../provider/declare.dart';
 

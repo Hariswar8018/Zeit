@@ -3,14 +3,15 @@ import 'package:firebase_auth/firebase_auth.dart';
 import 'package:flutter/material.dart';
 import 'package:page_transition/page_transition.dart';
 import 'package:provider/provider.dart';
-import 'package:zeit/add/feeds.dart';
-import 'package:zeit/cards/usercards.dart';
-import 'package:zeit/fee_performance/performance_user.dart';
-import 'package:zeit/model/usermodel.dart';
-import 'package:zeit/organisation/change.dart';
-import 'package:zeit/provider/declare.dart';
-import 'package:zeit/services/leave.dart';
-import 'package:zeit/superadmin/admin_login.dart';
+import 'package:zeitt/add/feeds.dart';
+import 'package:zeitt/cards/usercards.dart';
+import 'package:zeitt/fee_performance/performance_user.dart';
+import 'package:zeitt/model/usermodel.dart';
+import 'package:zeitt/organisation/change.dart';
+import 'package:zeitt/provider/declare.dart';
+import 'package:zeitt/services/files_see.dart';
+import 'package:zeitt/services/leave.dart';
+import 'package:zeitt/superadmin/admin_login.dart';
 
 import '../cards/profile_organisation.dart';
 import '../functions/flush.dart';
@@ -35,12 +36,12 @@ class More extends StatelessWidget {
                   if(_user!.source.isEmpty){
                     Send.message(context, "This function will work once you are Attached to Organisation", false);
                   }else{
-                    Navigator.push(
+                     Navigator.push(
                         context,
                         PageTransition(
-                            child: Feeds(),
-                            type: PageTransitionType.rightToLeft,
-                            duration: Duration(milliseconds: 200)));
+                            child: Notify(),
+                            type: PageTransitionType.leftToRight,
+                            duration: Duration(milliseconds: 400)));
                   }
                   print("rrukuli");
 
@@ -92,7 +93,16 @@ class More extends StatelessWidget {
                             duration: Duration(milliseconds: 200)));
                 },
                 child: a(Icon(Icons.leaderboard,color :  Colors.blue), "Performance", "Track Performances / Extras")),
-            a(Icon(Icons.file_copy,color :  Colors.black), "Files", "Discover Files Shared / Uploaded"),
+            InkWell(
+                onTap: (){
+                  Navigator.push(
+                      context,
+                      PageTransition(
+                          child: File_See(str: _user!.uid,),
+                          type: PageTransitionType.rightToLeft,
+                          duration: Duration(milliseconds: 60)));
+                },
+                child: a(Icon(Icons.file_copy,color :  Colors.black), "Files", "Discover Files Shared / Uploaded")),
             InkWell(
                 onTap: (){
                   Navigator.push(
@@ -105,7 +115,6 @@ class More extends StatelessWidget {
                 child: a(Icon(Icons.person,color :  Colors.purpleAccent), "User Profile", "See / Manage your all Profile")),
             InkWell(
                 onTap: () async {
-
                   String  uid = FirebaseAuth.instance.currentUser!.uid ;
                   try {
                     // Reference to the 'users' collection
@@ -122,7 +131,9 @@ class More extends StatelessWidget {
                               child: ProO(user: user,),
                               type: PageTransitionType.rightToLeft,
                               duration: Duration(milliseconds: 600)));
-                    } else {
+                    } else if(_user!.type=="Individual") {
+                      Send.message(context, "This function will work once you are Attached to Organisation", false);
+                    }else{
                       await showDialog(
                         context: context,
                         builder: (BuildContext context) {
@@ -156,22 +167,10 @@ class More extends StatelessWidget {
                           );
                         },
                       );
-
                     }
                   } catch (e) {
                     print("Error fetching user by uid: $e");
                     Send.message(context, "$e", false);
-                  }
-                },onLongPress: (){
-                  String? st = FirebaseAuth.instance.currentUser!.email;
-                  if(st=="hari@g.com"||st=="hariswarsamasi@gmail.com"||st=="brnrinnovations@gmail.com"){
-                    print("Ayus");
-                    Navigator.push(
-                        context,
-                        PageTransition(
-                            child: AdminLogin(),
-                            type: PageTransitionType.leftToRight,
-                            duration: Duration(milliseconds: 400)));
                   }
             },
                 child: a(Icon(Icons.business,color :  Colors.deepPurpleAccent), "Organisation", "Settings your Organisation Level")),
@@ -225,7 +224,6 @@ class More extends StatelessWidget {
                     );
                   },
                 );
-
               }, icon: Icon(Icons.login, color : Colors.red,size: 35,)),
               IconButton(onPressed: () async {
                 await showDialog(

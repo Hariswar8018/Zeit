@@ -4,15 +4,15 @@ import 'package:flutter_svg/flutter_svg.dart';
 import 'package:intl/intl.dart';
 import 'package:page_transition/page_transition.dart';
 import 'package:url_launcher/url_launcher.dart';
-import 'package:zeit/add/emp_history.dart';
-import 'package:zeit/cards/emphistory.dart';
-import 'package:zeit/cards/pdf.dart';
-import 'package:zeit/fee_performance/performance_see/task.dart';
-import 'package:zeit/fee_performance/performance_see/training.dart';
-import 'package:zeit/fee_performance/transaction.dart';
-import 'package:zeit/model/emp_history.dart';
-import 'package:zeit/model/pay.dart';
-import 'package:zeit/update/update_user.dart';
+import 'package:zeitt/add/emp_history.dart';
+import 'package:zeitt/cards/emphistory.dart';
+import 'package:zeitt/cards/pdf.dart';
+import 'package:zeitt/fee_performance/performance_see/task.dart';
+import 'package:zeitt/fee_performance/performance_see/training.dart';
+import 'package:zeitt/fee_performance/transaction.dart';
+import 'package:zeitt/model/emp_history.dart';
+import 'package:zeitt/model/pay.dart';
+import 'package:zeitt/update/update_user.dart';
 
 import '../model/usermodel.dart';
 
@@ -26,7 +26,7 @@ import 'package:cloud_firestore/cloud_firestore.dart';
 import 'package:cloud_firestore/cloud_firestore.dart';
 import 'package:intl/intl.dart';
 
-import 'package:zeit/model/time.dart';
+import 'package:zeitt/model/time.dart';
 import 'dart:async';
 
 import '../services/attendance.dart';
@@ -45,37 +45,72 @@ class _PerformanceUState extends State<PerformanceU> {
   late Map<String, double> dataMap2 ;
   Future<List<Date>> fetchDataFromFirestore() async {
     List<Date> firestoreDates = [];
-    int hy=0,hy1=0,hy2=0;
-    QuerySnapshot querySnapshot = await FirebaseFirestore.instance.collection("Users")
+    int hy = 0, hy1 = 0, hy2 = 0, hy3 = 0;
+
+    // Get the timestamp for 30 days ago
+    DateTime now = DateTime.now();
+    DateTime thirtyDaysAgo = now.subtract(Duration(days: 30));
+
+    // Fetch attendance records
+    QuerySnapshot querySnapshot = await FirebaseFirestore.instance
+        .collection("Users")
         .doc(widget.user.uid)
         .collection("Attendance")
         .get();
+
     querySnapshot.docs.forEach((doc) {
-      print(doc);
       DateTime date = DateTime.fromMillisecondsSinceEpoch(int.parse(doc['millisecondstos']));
-      print(doc['color']);
-      if(doc['color']==4294961979){
-        hy++;
-      }else if(doc['color']==4280391411){
-        hy1++;
-      }else{
-        hy2++;
+
+      // Only process dates within the last 30 days and before or equal to today
+      if (date.isAfter(thirtyDaysAgo) && date.isBefore(now.add(Duration(days: 1)))) {
+        int color = doc['color']; // No need to parse color
+
+        // Debugging: Log the date and color for analysis
+        print("Date: $date, Color: $color");
+
+        // Check color values and count accordingly
+        if (color == 4294961979) {
+          hy++; // Holiday
+        } else if (color == 4280391411) {
+          hy1++; // Present
+        } else if (color == 4280391415) {
+          hy3++; // Travel
+        } else {
+          hy2++; // Other (Absent, etc.)
+        }
+
+        // Add the date object to the list
+        firestoreDates.add(Date(
+          date: date,
+          color: Color(color),
+        ));
       }
-      firestoreDates.add(Date(
-        date: date,
-        color: Color(doc['color']), // Use Color directly, no need to parse as int
-      ));
     });
+
+    // Debugging: Log counts for each category
+    print("Holiday count: $hy, Present count: $hy1, Travel count: $hy3, Other count: $hy2");
+
+    // Check total attendance days for proper calculation
+    int totalDays = hy + hy1 + hy2 + hy3;
+    if (totalDays > 30) {
+      print("Warning: Total attendance days ($totalDays) exceed 30!");
+    }
+
+    // Update the data map
     setState(() {
       dataMap2 = {
-        "Leave": hy.toDouble(),
+        "Absent": (30 - hy1 - hy).toDouble(), // Adjust according to total counts
+        "Holiday": hy.toDouble(),
         "Present": hy1.toDouble(),
-        "Holiday": (30-hy1-hy).toDouble(),
-        "Travel": 1,
+        "Travel": hy3.toDouble(),
       };
     });
+
     return firestoreDates;
   }
+
+
+
   late Map<String, double> dataMap3 ;
   void initState(){
     try{
@@ -499,8 +534,9 @@ class _PerformanceUState extends State<PerformanceU> {
           children: [
             SizedBox(height:15),
             se("assets/calender-day-love-svgrepo-com.svg","Attendance Report"),
-            SizedBox(height:15),
+            SizedBox(height:9),
             _buildCalendarDialogButton(),
+            SizedBox(height:10),
             PieChart(
               dataMap: dataMap2,
               animationDuration: Duration(milliseconds: 800),

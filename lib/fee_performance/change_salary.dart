@@ -1,9 +1,9 @@
 import 'package:cloud_firestore/cloud_firestore.dart';
 import 'package:flutter/material.dart';
 import 'package:page_transition/page_transition.dart';
-import 'package:zeit/model/organisation.dart';
-import 'package:zeit/model/usermodel.dart';
-import 'package:zeit/update/update_user.dart';
+import 'package:zeitt/model/organisation.dart';
+import 'package:zeitt/model/usermodel.dart';
+import 'package:zeitt/update/update_user.dart';
 
 class NSalary extends StatefulWidget {
 OrganisationModel user;

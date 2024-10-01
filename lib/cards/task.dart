@@ -1,4 +1,5 @@
 import 'dart:io';
+import 'package:add_2_calendar/add_2_calendar.dart';
 import 'package:cloud_firestore/cloud_firestore.dart';
 import 'package:file_picker/file_picker.dart';
 import 'package:firebase_auth/firebase_auth.dart';
@@ -12,14 +13,16 @@ import 'package:provider/provider.dart';
 import 'package:slide_countdown/slide_countdown.dart';
 import 'package:social_login_buttons/social_login_buttons.dart';
 import 'package:url_launcher/url_launcher.dart';
-import 'package:zeit/cards/pdf.dart';
-import 'package:zeit/functions/google_map_check-in_out.dart';
-import 'package:zeit/functions/search.dart';
-import 'package:zeit/model/task_class.dart';
+import 'package:zeitt/add/add_task.dart';
+import 'package:zeitt/cards/pdf.dart';
+import 'package:zeitt/functions/flush.dart';
+import 'package:zeitt/functions/google_map_check-in_out.dart';
+import 'package:zeitt/functions/search.dart';
+import 'package:zeitt/model/task_class.dart';
 import 'package:flutter_timer_countdown/flutter_timer_countdown.dart';
-import 'package:zeit/model/usermodel.dart';
-import 'package:zeit/provider/declare.dart';
-import 'package:zeit/provider/upload.dart';
+import 'package:zeitt/model/usermodel.dart';
+import 'package:zeitt/provider/declare.dart';
+import 'package:zeitt/provider/upload.dart';
 import '../model/events.dart';
 import 'dart:typed_data' as uk ;
 class TaskU extends StatefulWidget {
@@ -112,6 +115,38 @@ class _TaskUState extends State<TaskU> {
                   TextStyle(fontWeight: FontWeight.w300, fontSize: 13),
                 ),
               ),
+              widget.user.hr?SizedBox(height: 1,):Padding(
+                padding: const EdgeInsets.only(bottom: 12.0),
+                child: Container(
+                  height: 20,
+                  width: 200,
+                  child: Row(
+                    mainAxisAlignment: MainAxisAlignment.start,
+                    crossAxisAlignment: CrossAxisAlignment.start,
+                    children: [
+                      SizedBox(width:15),
+                      CircleAvatar(
+                        radius: 20,
+                        backgroundImage: NetworkImage(widget.user.namepicol,),
+                      ),
+                      Column(
+                        mainAxisAlignment: MainAxisAlignment.start,
+                        crossAxisAlignment: CrossAxisAlignment.start,
+                        children: [
+                          Text("Added by ${widget.user.nameol}",
+                              style: TextStyle(
+                                  fontWeight: FontWeight.w400,
+                                  fontSize: 9,
+                                  color: Colors.grey)),
+                          Text(widget.user.etol,
+                              style:
+                              TextStyle(fontWeight: FontWeight.w300, fontSize: 6)),
+                        ],
+                      )
+                    ],
+                  ),
+                ),
+              ),
               Row(
                 children: [
                   widget.user.status=="Active"?Padding(
@@ -167,7 +202,9 @@ class _TaskUState extends State<TaskU> {
                   ),
                 ],
               ),
-              SizedBox(height: 7),
+              SizedBox(height: 3),
+
+              SizedBox(height: 3),
               Text("      Client Name : " + widget.user.client_name,
                   style: TextStyle(
                       fontWeight: FontWeight.w400,
@@ -194,6 +231,13 @@ class Tas extends StatefulWidget {
 }
 
 class _TasState extends State<Tas> {
+  bool ishr(UserModel user){
+    if(user.type=="Individual"){
+      return false;
+    }else{
+      return true;
+    }
+  }
 
   @override
   int active=0;
@@ -209,11 +253,172 @@ class _TasState extends State<Tas> {
     return Scaffold(
         extendBodyBehindAppBar: true,
         appBar: AppBar(
-          leading: IconButton(onPressed: (){
-            Navigator.pop(context);
-          }, icon: Icon(Icons.arrow_back_ios_new_outlined,color: Colors.white,)),
+          leading: InkWell(
+            onTap:()=>Navigator.pop(context),
+            child: Padding(
+              padding: const EdgeInsets.all(6.0),
+              child: CircleAvatar(
+                backgroundColor: Colors.blue,
+                child: Center(child: Icon(Icons.arrow_back_rounded,color:Colors.white,size: 22,)),
+              ),
+            ),
+          ),
           elevation: 0,
           backgroundColor: Colors.transparent,
+          actions: [
+            Padding(
+              padding: const EdgeInsets.only(right: 8.0),
+              child: InkWell(
+                onTap: (){
+                  try {
+                    // Print the original date string
+                    print(widget.user.startdate);
+
+                    // Parse the date using DateFormat since the format is dd/MM/yyyy
+                    DateTime parsedDate = DateFormat('dd/MM/yyyy').parse(widget.user.startdate);
+
+                    // Print the parsed date
+                    print(parsedDate);
+
+                    // Add 7 hours to get the end date
+                    DateTime endDate = parsedDate.add(Duration(hours: 7));
+                    DateTime ebdDate = DateFormat('dd/MM/yyyy').parse(widget.user.enddate);
+                    print(endDate);
+
+                    final Event event = Event(
+                      title: 'Task Service ${widget.user.name}',
+                      description: '${widget.user.description}',
+                      location: '',
+                      startDate: parsedDate,
+                      endDate: ebdDate,
+                      iosParams: IOSParams(
+                        reminder: Duration(hours: 1),
+                        url: 'https://www.example.com',
+                      ),
+                      androidParams: AndroidParams(
+                        emailInvites: [], // No email invites
+                      ),
+                    );
+
+                    // Add the event to the calendar
+                    Add2Calendar.addEvent2Cal(event);
+
+                    // Log the event start and end dates
+                    print('Event Start Date: $parsedDate');
+                    print('Event End Date: $endDate');
+                  } catch (e) {
+                    // Handle errors and display the message
+                    Send.message(context, "$e", false);
+                  }
+
+                },
+                child: CircleAvatar(
+                  backgroundColor: Colors.blueAccent,
+                  child: Icon(Icons.calendar_month,color: Colors.white,),
+                ),
+              ),
+            ),
+            InkWell(
+              onTap:() async {
+                if(ishr(_user!)||widget.user.nameol==_user.Name){
+                  await showDialog(
+                    context: context,
+                    builder: (BuildContext context) {
+                      return AlertDialog(
+                        title: Text('Delete Task '),
+                        content: Text('You Sure to Delete the Task Permanently'),
+                        actions: [
+                          ElevatedButton(
+                            child: Text('No'),
+                            onPressed: () {
+                              Navigator.pop(context);
+                            },
+                          ),
+                          ElevatedButton(
+                            child: Text('Yes'),
+                            onPressed: () async {
+                              await FirebaseFirestore.instance
+                                  .collection('Company')
+                                  .doc(_user!.source).collection("Tasks").doc(widget.user.id).delete();
+                              Navigator.pop(context);
+
+                              Send.message(context, "Delete Success", true);
+                            },
+                          ),
+                        ],
+                      );
+                    },
+                  );
+                } else if(_user.type=="Individual"){
+                  Send.message(context, "Only HR could delete this Task",false);
+                } else{
+                  await showDialog(
+                    context: context,
+                    builder: (BuildContext context) {
+                      return AlertDialog(
+                        title: Text('Delete Task '),
+                        content: Text('You Sure to Delete the Task Permanently'),
+                        actions: [
+                          ElevatedButton(
+                            child: Text('No'),
+                            onPressed: () {
+                              Navigator.pop(context);
+                            },
+                          ),
+                          ElevatedButton(
+                            child: Text('Yes'),
+                            onPressed: () async {
+                              await FirebaseFirestore.instance
+                                  .collection('Company')
+                                  .doc(_user!.source).collection("Tasks").doc(widget.user.id).delete();
+                              Navigator.pop(context);
+
+                              Send.message(context, "Delete Success", true);
+                            },
+                          ),
+                        ],
+                      );
+                    },
+                  );
+                }},
+              child: Padding(
+                padding: const EdgeInsets.all(6.0),
+                child: CircleAvatar(
+                  backgroundColor: Colors.red,
+                  child: Center(child: Icon(Icons.delete,color:Colors.white,size: 22,)),
+                ),
+              ),
+            ),
+            InkWell(
+              onTap:(){
+                if(ishr(_user!)||widget.user.nameol==_user.Name){
+                  Navigator.push(
+                      context,
+                      PageTransition(
+                          child: AddTask(hj: widget.user, on: true,),
+                          type: PageTransitionType.rightToLeft,
+                          duration: Duration(milliseconds: 600)));
+                } else if(_user.type=="Individual"){
+                  Send.message(context, "Only HR could edit this Task",false);
+                } else{
+                  Navigator.push(
+                      context,
+                      PageTransition(
+                          child: AddTask(hj: widget.user, on: true,),
+                          type: PageTransitionType.rightToLeft,
+                          duration: Duration(milliseconds: 600)));
+                }
+              },
+              child: Padding(
+                padding: const EdgeInsets.all(6.0),
+                child: CircleAvatar(
+                  backgroundColor: Colors.blue,
+                  child: Center(child: Icon(Icons.more_vert_outlined,color:Colors.white,size: 22,)),
+                ),
+              ),
+            ),
+
+          ],
         ),
         body:SingleChildScrollView(
           child: Column(
@@ -239,6 +444,38 @@ class _TasState extends State<Tas> {
                     SizedBox(height:3),
                     Text("Task Start Date : "+widget.user.startdate, style: TextStyle(fontWeight: FontWeight.w500,fontSize: 14,color: Colors.grey),),
                     SizedBox(height:10),
+                    widget.user.hr?SizedBox(height: 1,):Padding(
+                      padding: const EdgeInsets.only(bottom: 5.0),
+                      child: Container(
+                        height: 40,
+                        width: 200,
+                        child: Row(
+                          mainAxisAlignment: MainAxisAlignment.start,
+                          crossAxisAlignment: CrossAxisAlignment.start,
+                          children: [
+
+                            CircleAvatar(
+                              radius: 30,
+                              backgroundImage: NetworkImage(widget.user.namepicol,),
+                            ),
+                            Column(
+                              mainAxisAlignment: MainAxisAlignment.start,
+                              crossAxisAlignment: CrossAxisAlignment.start,
+                              children: [
+                                Text("Added by ${widget.user.nameol}",
+                                    style: TextStyle(
+                                        fontWeight: FontWeight.w800,
+                                        fontSize: 14,
+                                        color: Colors.grey)),
+                                Text(widget.user.etol,
+                                    style:
+                                    TextStyle(fontWeight: FontWeight.w300, fontSize: 11)),
+                              ],
+                            )
+                          ],
+                        ),
+                      ),
+                    ),
                     Container(
                       height: 51, width: MediaQuery.of(context).size.width,
                       child: ListView.builder(

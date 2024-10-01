@@ -1,16 +1,18 @@
 import 'package:cloud_firestore/cloud_firestore.dart';
 
-
+import 'package:google_sign_in/google_sign_in.dart';
 import 'package:firebase_auth/firebase_auth.dart';
 import 'package:flutter/material.dart';
-import 'package:zeit/first/forgot.dart';
-import 'package:zeit/first/info.dart' ;
-import 'package:zeit/main.dart' ;
-import 'package:zeit/model/usermodel.dart' ;
+import 'package:zeitt/first/forgot.dart';
+import 'package:zeitt/first/info.dart' ;
+import 'package:zeitt/functions/flush.dart';
+import 'package:zeitt/main.dart' ;
+import 'package:zeitt/model/usermodel.dart' ;
 
 import 'package:page_transition/page_transition.dart';
 import 'package:shared_preferences/shared_preferences.dart';
 import 'package:social_login_buttons/social_login_buttons.dart';
+import 'package:zeitt/superadmin/admin_login.dart';
 
 import '../main_pages/navigation.dart';
 
@@ -41,6 +43,7 @@ class _LoginScreenState extends State<LoginScreen> {
     bool go = false ;
   @override
   Widget build(BuildContext context) {
+    double w=MediaQuery.of(context).size.width;
     return WillPopScope(
       onWillPop: () async {
         // Show the alert dialog and wait for a result
@@ -152,36 +155,23 @@ class _LoginScreenState extends State<LoginScreen> {
                   buttonType: SocialLoginButtonType.generalLogin,
                   onPressed: () async {
                     a();
+
                     try {
                       final credential = await FirebaseAuth.instance.signInWithEmailAndPassword(
                         email: _emailController.text,
                         password: _confirmPasswordController.text,
                       );
-                      Navigator.push(
-                          context, PageTransition(
-                          child:MyHomePage(title: 'hjh',), type: PageTransitionType.rightToLeft, duration: Duration(milliseconds: 50)
-                      ));
+                      String sn = credential.user!.uid ;
+                      checkonce(sn);
                     } on FirebaseAuthException catch (e) {
                       if (e.code == 'user-not-found') {
+                        Send.message(context, "No User found for this Email", false);
                         print('No user found for that email.');
-                        ScaffoldMessenger.of(context).showSnackBar(
-                          SnackBar(
-                            content: Text('No User found for this Email'),
-                          ),
-                        );
                       } else if (e.code == 'wrong-password') {
                         print('Wrong password provided for that user.');
-                        ScaffoldMessenger.of(context).showSnackBar(
-                          SnackBar(
-                            content: Text('Wrong password provided for that user.'),
-                          ),
-                        );
+                        Send.message(context, "Wrong password provided for that user", false);
                       } else {
-                        ScaffoldMessenger.of(context).showSnackBar(
-                          SnackBar(
-                            content: Text('${e}'),
-                          ),
-                        );
+                        Send.message(context, "$e", false);
                       }
                       a();
                     }
@@ -236,24 +226,26 @@ class _LoginScreenState extends State<LoginScreen> {
                   fontSize: 21,
                   buttonType: SocialLoginButtonType.google,
                   onPressed: () async {
-
+                    try {
+                      final GoogleSignInAccount? googleUser = await GoogleSignIn().signIn();
+                      final GoogleSignInAuthentication googleAuth = await googleUser!
+                          .authentication;
+                      final AuthCredential credential = GoogleAuthProvider
+                          .credential(
+                        accessToken: googleAuth.accessToken,
+                        idToken: googleAuth.idToken,
+                      );
+                      await FirebaseAuth.instance.signInWithCredential(credential);
+                      String uid= await FirebaseAuth.instance.currentUser!.uid;
+                      checkonce(uid);
+                    }catch(e){
+                      print(e);
+                      Send.message(context, "$e", false);
+                    }
                   }),
             ),
             SizedBox(
               height: 15,
-            ),
-            Padding(
-              padding: const EdgeInsets.only(left: 18.0, right: 18),
-              child: SocialLoginButton(
-                  backgroundColor: Colors.blue,
-                  height: 40,
-                  text: 'Continue with Facebook',
-                  borderRadius: 20,
-                  fontSize: 21,
-                  buttonType: SocialLoginButtonType.facebook,
-                  onPressed: () async {
-
-                  }),
             ),
           ],
         ) :
@@ -274,6 +266,13 @@ class _LoginScreenState extends State<LoginScreen> {
                   TextStyle(fontSize: 15, fontWeight: FontWeight.w300, color: Colors.grey)),
             ),
             SizedBox(height: 10,),
+            Row(
+              mainAxisAlignment: MainAxisAlignment.spaceEvenly,
+              children: [
+                fg(w,0,"Individual"),fg(w,1,"HR"),
+                fg(w,2,"Director"),
+              ],
+            ),
             Padding(
               padding: const EdgeInsets.all(8.0),
               child: Container(
@@ -329,9 +328,9 @@ class _LoginScreenState extends State<LoginScreen> {
               child: SocialLoginButton(
                   backgroundColor: Colors.blue,
                   height: 40,
-                  text: 'Next',
+                  text: 'Create Account as $strin',
                   borderRadius: 20,
-                  fontSize: 21,
+                  fontSize: 20,
                   buttonType: SocialLoginButtonType.generalLogin,
                   onPressed: () async {
                     a();
@@ -343,49 +342,21 @@ class _LoginScreenState extends State<LoginScreen> {
                       );
                       print(credential);
                       String sn = credential.user!.uid ;
-                      Navigator.push(
-                          context,
-                          PageTransition(
-                              child: Step1(),
-                              type: PageTransitionType.rightToLeft,
-                              duration: Duration(milliseconds: 800)));
-                      ScaffoldMessenger.of(context).showSnackBar(
-                        SnackBar(
-                          content: Text('Welcome, We will need some additional details for Account to Ste Up' ),
-                        ),
-                      );
+                      checkonce(sn);
+                      Send.message(context, "Welcome, We will need some additional details for Account to Ste Up", true);
                     } on FirebaseAuthException catch (e) {
                       if (e.code == 'weak-password') {
                         print('The password provided is too weak.');
-                        ScaffoldMessenger.of(context).showSnackBar(
-                          SnackBar(
-                            content: Text(
-                                'The password provided is too weak.'),
-                          ),
-                        );
+                        Send.message(context, "The password provided is too weak", false);
                       } else if (e.code == 'email-already-in-use') {
                         print(
                             'The account already exists for that email.');
-                        ScaffoldMessenger.of(context).showSnackBar(
-                          SnackBar(
-                            content: Text(
-                                'The account already exists for that email.'),
-                          ),
-                        );
+                        Send.message(context, "The account already exists for that email.", false);
                       } else {
-                        ScaffoldMessenger.of(context).showSnackBar(
-                          SnackBar(
-                            content: Text('${e}'),
-                          ),
-                        );
+                        Send.message(context, "$e", false);
                       }
                     } catch (e) {
-                      ScaffoldMessenger.of(context).showSnackBar(
-                        SnackBar(
-                          content: Text(
-                              '${e}'),
-                        ),
-                      );
+                      Send.message(context, "$e", false);
                     }
                     a();
                   }),
@@ -424,6 +395,81 @@ class _LoginScreenState extends State<LoginScreen> {
       ),
     );
   }
+  Future<void> checkonce(String uid) async {
+    String df=_emailController.text;
+    if(df=="brnrinnovation@gmail.com"||df=="admin@zeitt.com"){
+      Navigator.push(
+          context, PageTransition(
+          child:AdminLogin(), type: PageTransitionType.rightToLeft, duration: Duration(milliseconds: 50)
+      ));
+    }else{
+      CollectionReference usersCollection = FirebaseFirestore.instance.collection('Users');
+      QuerySnapshot querySnapshot = await usersCollection.where('uid', isEqualTo: uid).get();
+      if (querySnapshot.docs.isNotEmpty) {
+        UserModel user = UserModel.fromSnap(querySnapshot.docs.first);
+        if(user.Name.isEmpty){
+          Navigator.push(
+              context,
+              PageTransition(
+                  child: Step1(strr: user.type,source: user.source,),
+                  type: PageTransitionType.rightToLeft,
+                  duration: Duration(milliseconds: 800)));
+        }else{
+          Navigator.push(
+              context, PageTransition(
+              child:MyHomePage(title: 'hjh',), type: PageTransitionType.rightToLeft, duration: Duration(milliseconds: 50)
+          ));
+        }
+        Send.message(context, "Login Success !",true);
+      } else {
+        Navigator.push(
+            context,
+            PageTransition(
+                child: Step1(strr: strin,),
+                type: PageTransitionType.rightToLeft,
+                duration: Duration(milliseconds: 800)));
+        Send.message(context, "Welcome, We will need some additional details for Account to Set Up", true);
+      }
+    }
+
+  }
+  String strin = "Individual";
+  Widget fg(double w,int i,String st){
+    return InkWell(
+      onTap: (){
+        setState(() {
+          strin=st;
+        });
+      },
+      child: Card(
+        color: st==strin?Colors.blue:Colors.white,
+        child: Container(
+          width: w/3-10,
+          height: w/3-10,
+          child: Column(
+            mainAxisAlignment: MainAxisAlignment.center,
+            children: [
+              sd(i,st==strin),
+              SizedBox(height: 5,),
+              Text(st,style: TextStyle(fontSize: 14,fontWeight: FontWeight.w700,color: st==strin?Colors.white:Colors.black),)
+            ],
+          ),
+        ),
+      ),
+    );
+  }
+  Widget sd(int i,bool yes){
+    if(i==0){
+      return Icon(Icons.accessibility_new,color:yes?Colors.white:Colors.black,size: 20,);
+    }else if(i==1){
+      return Icon(Icons.work,color:yes?Colors.white:Colors.black,size: 20,);
+    }else if(i==2){
+      return Icon(Icons.factory,color:yes?Colors.white:Colors.black,size: 20,);
+    }else {
+      return Icon(Icons.security,color:yes?Colors.white:Colors.black,size: 20,);
+    }
+  }
+
   void a(){
     setState((){
       go = !go ;

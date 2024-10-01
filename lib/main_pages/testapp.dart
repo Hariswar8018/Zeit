@@ -5,8 +5,8 @@ import 'package:firebase_auth/firebase_auth.dart';
 import 'package:flutter/material.dart';
 import 'package:page_transition/page_transition.dart';
 import 'package:slide_countdown/slide_countdown.dart';
-import 'package:zeit/functions/google_map_check-in_out.dart';
-import 'package:zeit/model/time.dart';
+import 'package:zeitt/functions/google_map_check-in_out.dart';
+import 'package:zeitt/model/time.dart';
 
 class Test extends StatefulWidget {
   const Test({super.key});

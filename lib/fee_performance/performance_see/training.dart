@@ -1,10 +1,10 @@
 import 'package:cloud_firestore/cloud_firestore.dart';
 import 'package:flutter/material.dart';
 import 'package:provider/provider.dart';
-import 'package:zeit/main_pages/home.dart';
-import 'package:zeit/model/training.dart';
-import 'package:zeit/model/usermodel.dart';
-import 'package:zeit/provider/declare.dart';
+import 'package:zeitt/main_pages/home.dart';
+import 'package:zeitt/model/training.dart';
+import 'package:zeitt/model/usermodel.dart';
+import 'package:zeitt/provider/declare.dart';
 
 import '../../cards/task.dart';
 import '../../model/task_class.dart';

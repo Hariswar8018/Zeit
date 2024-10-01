@@ -2,11 +2,11 @@ import 'package:cloud_firestore/cloud_firestore.dart';
 import 'package:firebase_auth/firebase_auth.dart';
 import 'package:flutter/material.dart';
 import 'package:page_transition/page_transition.dart';
-import 'package:zeit/add/add_jobs.dart';
-import 'package:zeit/cards/jobcard.dart';
-import 'package:zeit/functions/flush.dart';
-import 'package:zeit/model/job.dart';
-import 'package:zeit/model/organisation.dart';
+import 'package:zeitt/add/add_jobs.dart';
+import 'package:zeitt/cards/jobcard.dart';
+import 'package:zeitt/functions/flush.dart';
+import 'package:zeitt/model/job.dart';
+import 'package:zeitt/model/organisation.dart';
 
 class Jobh extends StatefulWidget {
   bool hr;

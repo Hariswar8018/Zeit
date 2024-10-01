@@ -37,6 +37,19 @@ class UserModel {
     required this.link3,
     required this.shit,
     required this.salary,
+    required this.meetlink,
+    required this.meetname,
+    required this.meetid,
+    required this.meetby,
+    required this.meetpic,
+    required this.meetdesc,
+
+    // New fields for banking
+    required this.bankname,
+    required this.bankaccount,
+    required this.bankaccountname,
+    required this.ifsccode,
+    required this.upiname,
   });
 
   late final String lastlogin;
@@ -78,6 +91,21 @@ class UserModel {
   late final String token;
   late final double salary;
 
+  // New meeting fields
+  late final String meetlink;
+  late final String meetname;
+  late final String meetid;
+  late final String meetby;
+  late final String meetpic;
+  late final String meetdesc;
+
+  // New banking fields
+  late final String bankname;
+  late final String bankaccount;
+  late final String bankaccountname;
+  late final String ifsccode;
+  late final String upiname;
+
   UserModel.fromJson(Map<String, dynamic> json) {
     follower = List<dynamic>.from(json['jobfollower'] ?? []);
     token = json['token'] ?? "j";
@@ -117,6 +145,21 @@ class UserModel {
     link3 = json['link3'] ?? '';
     shit = json['shit'] ?? '';
     salary = (json['salary'] ?? 0.0).toDouble();
+
+    // New meeting fields initialization
+    meetlink = json['meetlink'] ?? '';
+    meetname = json['meetname'] ?? '';
+    meetid = json['meetid'] ?? '';
+    meetby = json['meetby'] ?? '';
+    meetpic = json['meetpic'] ?? '';
+    meetdesc = json['meetdesc'] ?? '';
+
+    // New banking fields initialization
+    bankname = json['bankname'] ?? '';
+    bankaccount = json['bankaccount'] ?? '';
+    bankaccountname = json['bankaccountname'] ?? '';
+    ifsccode = json['ifsccode'] ?? '';
+    upiname = json['upiname'] ?? '';
   }
 
   Map<String, dynamic> toJson() {
@@ -156,6 +199,22 @@ class UserModel {
     data['link3'] = link3;
     data['shit'] = shit;
     data['salary'] = salary;
+
+    // Adding new meeting fields to JSON
+    data['meetlink'] = meetlink;
+    data['meetname'] = meetname;
+    data['meetid'] = meetid;
+    data['meetby'] = meetby;
+    data['meetpic'] = meetpic;
+    data['meetdesc'] = meetdesc;
+
+    // Adding new banking fields to JSON
+    data['bankname'] = bankname;
+    data['bankaccount'] = bankaccount;
+    data['bankaccountname'] = bankaccountname;
+    data['ifsccode'] = ifsccode;
+    data['upiname'] = upiname;
+
     return data;
   }
 

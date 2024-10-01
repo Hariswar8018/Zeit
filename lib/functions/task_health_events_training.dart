@@ -3,9 +3,9 @@ import 'package:flutter/material.dart';
 import 'package:page_transition/page_transition.dart';
 import 'package:provider/provider.dart';
 import 'package:social_login_buttons/social_login_buttons.dart';
-import 'package:zeit/main_pages/navigation.dart';
-import 'package:zeit/model/usermodel.dart';
-import 'package:zeit/notification/notify_all.dart';
+import 'package:zeitt/main_pages/navigation.dart';
+import 'package:zeitt/model/usermodel.dart';
+import 'package:zeitt/notification/notify_all.dart';
 
 import '../provider/declare.dart';
 
@@ -132,6 +132,7 @@ class How extends StatelessWidget{
                       print(tokens);
                     });
                     await NotifyAll.sendNotificationsCompany(topic, message, tokens);
+                    await NotifyAll.sendallhradmin(_user.source, "Notification that a New Task was created", message);
                     Navigator.pushReplacement(
                         context,
                         PageTransition(

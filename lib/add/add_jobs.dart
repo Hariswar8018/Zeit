@@ -5,8 +5,8 @@ import 'package:flutter/material.dart';
 import 'package:intl/intl.dart';
 import 'package:provider/provider.dart';
 import 'package:social_login_buttons/social_login_buttons.dart';
-import 'package:zeit/model/job.dart';
-import 'package:zeit/model/usermodel.dart';
+import 'package:zeitt/model/job.dart';
+import 'package:zeitt/model/usermodel.dart';
 
 import '../model/organisation.dart';
 import '../provider/declare.dart';

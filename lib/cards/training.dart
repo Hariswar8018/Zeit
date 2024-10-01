@@ -1,4 +1,5 @@
 
+import 'package:add_2_calendar/add_2_calendar.dart';
 import 'package:cloud_firestore/cloud_firestore.dart';
 import 'package:firebase_auth/firebase_auth.dart';
 import 'package:flutter/material.dart';
@@ -7,10 +8,11 @@ import 'package:intl/intl.dart';
 import 'package:provider/provider.dart';
 import 'package:slide_countdown/slide_countdown.dart';
 import 'package:social_login_buttons/social_login_buttons.dart';
-import 'package:zeit/functions/search.dart';
-import 'package:zeit/model/training.dart';
-import 'package:zeit/model/usermodel.dart';
-import 'package:zeit/provider/declare.dart';
+import 'package:zeitt/functions/flush.dart';
+import 'package:zeitt/functions/search.dart';
+import 'package:zeitt/model/training.dart';
+import 'package:zeitt/model/usermodel.dart';
+import 'package:zeitt/provider/declare.dart';
 
 class TrainMe extends StatefulWidget {
   TrainMe({super.key,required this.user});
@@ -45,6 +47,62 @@ class _TrainMeState extends State<TrainMe> {
             ),
           ),
         ),
+        actions: [
+          Padding(
+            padding: const EdgeInsets.only(right: 8.0),
+            child: InkWell(
+              onTap: (){
+                try {
+                  // Print the original date string
+                  print(widget.user.start);
+
+                  // Parse the date using DateFormat since the format is dd/MM/yyyy
+                  DateTime parsedDate = DateFormat('dd/MM/yyyy').parse(widget.user.start);
+
+                  // Print the parsed date
+                  print(parsedDate);
+
+                  // Add 7 hours to get the end date
+                  DateTime endDate = parsedDate.add(Duration(hours: 7));
+                  DateTime ebdDate = DateFormat('dd/MM/yyyy').parse(widget.user.end);
+                  // Print the end date
+                  print(endDate);
+
+                  // Create the event
+                  final Event event = Event(
+                    title: 'Health Service ${widget.user.company}',
+                    description: 'Holiday declared by HR : ${widget.user.desc}',
+                    location: '',
+                    startDate: parsedDate,
+                    endDate: ebdDate,
+                    iosParams: IOSParams(
+                      reminder: Duration(hours: 1),
+                      url: 'https://www.example.com',
+                    ),
+                    androidParams: AndroidParams(
+                      emailInvites: [], // No email invites
+                    ),
+                  );
+
+                  // Add the event to the calendar
+                  Add2Calendar.addEvent2Cal(event);
+
+                  // Log the event start and end dates
+                  print('Event Start Date: $parsedDate');
+                  print('Event End Date: $endDate');
+                } catch (e) {
+                  // Handle errors and display the message
+                  Send.message(context, "$e", false);
+                }
+
+              },
+              child: CircleAvatar(
+                backgroundColor: Colors.blueAccent,
+                child: Icon(Icons.calendar_month,color: Colors.white,),
+              ),
+            ),
+          )
+        ],
         elevation: 0,
         backgroundColor: Colors.transparent,
       ),

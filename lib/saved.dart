@@ -1,8 +1,8 @@
 import 'package:cloud_firestore/cloud_firestore.dart';
 import 'package:firebase_auth/firebase_auth.dart';
 import 'package:flutter/material.dart';
-import 'package:zeit/cards/jobcard.dart';
-import 'package:zeit/model/job.dart';
+import 'package:zeitt/cards/jobcard.dart';
+import 'package:zeitt/model/job.dart';
 
 class SavedJ extends StatelessWidget {
   SavedJ({super.key});

@@ -2,10 +2,10 @@ import 'package:cloud_firestore/cloud_firestore.dart';
 import 'package:firebase_auth/firebase_auth.dart';
 import 'package:flutter/material.dart';
 import 'package:provider/provider.dart';
-import 'package:zeit/fee_performance/transaction.dart';
-import 'package:zeit/model/pay.dart';
-import 'package:zeit/model/usermodel.dart';
-import 'package:zeit/provider/declare.dart';
+import 'package:zeitt/fee_performance/transaction.dart';
+import 'package:zeitt/model/pay.dart';
+import 'package:zeitt/model/usermodel.dart';
+import 'package:zeitt/provider/declare.dart';
 
 class My_Payroll extends StatefulWidget {
   const My_Payroll({super.key});

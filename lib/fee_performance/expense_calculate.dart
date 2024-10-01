@@ -3,7 +3,7 @@ import 'package:d_chart/ordinal/bar.dart';
 import 'package:flutter/material.dart';
 import 'package:page_transition/page_transition.dart';
 
-import 'package:zeit/model/organisation.dart';
+import 'package:zeitt/model/organisation.dart';
 
 import '../update/update_user.dart';
 

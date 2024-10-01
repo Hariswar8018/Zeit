@@ -5,15 +5,15 @@ import 'package:flutter_svg/flutter_svg.dart';
 import 'package:page_transition/page_transition.dart';
 import 'package:provider/provider.dart';
 import 'package:social_login_buttons/social_login_buttons.dart';
-import 'package:zeit/fee_performance/expense_calculate.dart';
-import 'package:zeit/fee_performance/expense_screen.dart';
-import 'package:zeit/fee_performance/new_expense.dart';
-import 'package:zeit/fee_performance/salary_template.dart';
-import 'package:zeit/fee_performance/transaction.dart';
-import 'package:zeit/model/organisation.dart';
-import 'package:zeit/model/pay.dart';
-import 'package:zeit/model/usermodel.dart';
-import 'package:zeit/provider/declare.dart';
+import 'package:zeitt/fee_performance/expense_calculate.dart';
+import 'package:zeitt/fee_performance/expense_screen.dart';
+import 'package:zeitt/fee_performance/new_expense.dart';
+import 'package:zeitt/fee_performance/salary_template.dart';
+import 'package:zeitt/fee_performance/transaction.dart';
+import 'package:zeitt/model/organisation.dart';
+import 'package:zeitt/model/pay.dart';
+import 'package:zeitt/model/usermodel.dart';
+import 'package:zeitt/provider/declare.dart';
 
 class Expense extends StatelessWidget {
   OrganisationModel user;

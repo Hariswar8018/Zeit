@@ -3,10 +3,10 @@ import 'package:flutter/material.dart';
 import 'package:flutter_svg/flutter_svg.dart';
 import 'package:pie_chart/pie_chart.dart';
 import 'package:provider/provider.dart';
-import 'package:zeit/fee_performance/expense_calculate.dart';
-import 'package:zeit/model/organisation.dart';
-import 'package:zeit/model/usermodel.dart';
-import 'package:zeit/provider/declare.dart';
+import 'package:zeitt/fee_performance/expense_calculate.dart';
+import 'package:zeitt/model/organisation.dart';
+import 'package:zeitt/model/usermodel.dart';
+import 'package:zeitt/provider/declare.dart';
 
 class Kpi extends StatefulWidget {
   OrganisationModel user;

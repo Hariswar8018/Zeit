@@ -5,9 +5,9 @@ import 'package:flutter/material.dart';
 import 'package:intl/intl.dart';
 import 'package:provider/provider.dart';
 import 'package:social_login_buttons/social_login_buttons.dart';
-import 'package:zeit/model/feeds.dart';
-import 'package:zeit/model/task_class.dart';
-import 'package:zeit/notification/notify_all.dart';
+import 'package:zeitt/model/feeds.dart';
+import 'package:zeitt/model/task_class.dart';
+import 'package:zeitt/notification/notify_all.dart';
 
 import '../model/usermodel.dart';
 import '../provider/declare.dart';

@@ -2,9 +2,9 @@ import 'package:cloud_firestore/cloud_firestore.dart';
 import 'package:flutter/material.dart';
 import 'package:page_transition/page_transition.dart';
 import 'package:provider/provider.dart';
-import 'package:zeit/add/add_feeds.dart';
-import 'package:zeit/model/feeds.dart';
-import 'package:zeit/model/usermodel.dart';
+import 'package:zeitt/add/add_feeds.dart';
+import 'package:zeitt/model/feeds.dart';
+import 'package:zeitt/model/usermodel.dart';
 
 import '../cards/FeedsU.dart';
 import '../provider/declare.dart';
@@ -12,6 +12,13 @@ import '../provider/declare.dart';
 class Feeds extends StatelessWidget {
    Feeds({super.key});
    List<Feed> _list = [];
+   bool ishr(UserModel user){
+     if(user.type=="Individual"){
+       return false;
+     }else{
+       return true;
+     }
+   }
   @override
   Widget build(BuildContext context) {
     UserModel? _user = Provider.of<UserProvider>(context).getUser;
@@ -30,7 +37,7 @@ class Feeds extends StatelessWidget {
           ),
         ),
       ),
-      floatingActionButton:InkWell(
+      floatingActionButton:ishr(_user!)?InkWell(
         onTap: (){
           Navigator.push(
               context,
@@ -56,7 +63,7 @@ class Feeds extends StatelessWidget {
             ),
           ),
         ),
-      ),
+      ):SizedBox(),
       body: StreamBuilder(
         stream: FirebaseFirestore.instance
             .collection('Company')

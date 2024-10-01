@@ -2,8 +2,8 @@ import 'package:cloud_firestore/cloud_firestore.dart';
 import 'package:flutter/material.dart';
 import 'package:page_transition/page_transition.dart';
 import 'package:provider/provider.dart';
-import 'package:zeit/cards/FeedsU.dart';
-import 'package:zeit/provider/declare.dart';
+import 'package:zeitt/cards/FeedsU.dart';
+import 'package:zeitt/provider/declare.dart';
 
 import '../add/add_feeds.dart';
 import '../model/feeds.dart';
@@ -11,7 +11,13 @@ import '../model/usermodel.dart';
 
 class Notify extends StatelessWidget {
   Notify({super.key});
-
+  bool ishr(UserModel user){
+    if(user.type=="Individual"){
+      return false;
+    }else{
+      return true;
+    }
+  }
   List<Feed> _list = [];
   @override
   Widget build(BuildContext context) {
@@ -31,7 +37,7 @@ class Notify extends StatelessWidget {
           ),
         ),
       ),
-      floatingActionButton:InkWell(
+      floatingActionButton:ishr(_user!)?InkWell(
         onTap: (){
           Navigator.push(
               context,
@@ -57,7 +63,7 @@ class Notify extends StatelessWidget {
             ),
           ),
         ),
-      ),
+      ):SizedBox(),
       body: StreamBuilder(
         stream: FirebaseFirestore.instance
             .collection('Company')

@@ -3,9 +3,9 @@ import 'package:cloud_firestore/cloud_firestore.dart';
 
 import 'package:firebase_auth/firebase_auth.dart';
 import 'package:flutter/material.dart';
-import 'package:zeit/first/info.dart' ;
-import 'package:zeit/main.dart' ;
-import 'package:zeit/model/usermodel.dart' ;
+import 'package:zeitt/first/info.dart' ;
+import 'package:zeitt/main.dart' ;
+import 'package:zeitt/model/usermodel.dart' ;
 
 import 'package:page_transition/page_transition.dart';
 import 'package:shared_preferences/shared_preferences.dart';

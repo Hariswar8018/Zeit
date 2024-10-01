@@ -1,10 +1,11 @@
 import 'package:cloud_firestore/cloud_firestore.dart';
+import 'package:firebase_auth/firebase_auth.dart';
 import 'package:flutter/material.dart';
 import 'package:page_transition/page_transition.dart';
 import 'package:provider/provider.dart';
-import 'package:zeit/add/add_request.dart';
-import 'package:zeit/model/approval.dart';
-import 'package:zeit/model/usermodel.dart';
+import 'package:zeitt/add/add_request.dart';
+import 'package:zeitt/model/approval.dart';
+import 'package:zeitt/model/usermodel.dart';
 
 import '../cards/request_C.dart';
 import '../provider/declare.dart';
@@ -60,6 +61,27 @@ class HrLetters extends StatelessWidget {
                         duration: Duration(milliseconds: 600)));
               },
               child: a(Icon(Icons.accessible_forward,color :  Colors.blue), "Experience Letter", "Track Performances / Extras")),
+
+          InkWell(
+              onTap: (){
+                Navigator.push(
+                    context,
+                    PageTransition(
+                        child: Hr(str : "Salary Certificate"),
+                        type: PageTransitionType.leftToRight,
+                        duration: Duration(milliseconds: 600)));
+              },
+              child: a(Icon(Icons.monetization_on,color :  Colors.red), "Salary Letter", "Certificate for Income/Salary Proof")),
+          InkWell(
+              onTap: (){
+                Navigator.push(
+                    context,
+                    PageTransition(
+                        child: Hr(str : "Resignation"),
+                        type: PageTransitionType.leftToRight,
+                        duration: Duration(milliseconds: 600)));
+              },
+              child: a(Icon(Icons.exit_to_app_rounded,color :  Colors.deepPurpleAccent), "Resignation Letter", "Ask for Resignation from Company")),
         ]
       ),
     );
@@ -125,7 +147,7 @@ class Hr extends StatelessWidget {
       ),
       body: StreamBuilder(
         stream: FirebaseFirestore.instance
-            .collection('Company').doc(_user!.source).collection("Requests").where("topic", isEqualTo: str)
+            .collection('Company').doc(_user!.source).collection("Requests").where("topic", isEqualTo: str).where("userid",isEqualTo: FirebaseAuth.instance.currentUser!.uid)
             .snapshots() ,
         builder: (context, snapshot) {
           if (snapshot.connectionState == ConnectionState.waiting) {

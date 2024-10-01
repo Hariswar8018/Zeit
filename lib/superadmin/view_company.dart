@@ -1,8 +1,8 @@
 import 'package:cloud_firestore/cloud_firestore.dart';
 import 'package:flutter/material.dart';
 import 'package:page_transition/page_transition.dart';
-import 'package:zeit/cards/profile_organisation.dart';
-import 'package:zeit/model/organisation.dart';
+import 'package:zeitt/cards/profile_organisation.dart';
+import 'package:zeitt/model/organisation.dart';
 
 class ViewCompanies extends StatefulWidget {
   bool view;

@@ -3,10 +3,10 @@ import 'package:calendar_date_picker2/calendar_date_picker2.dart';
 import 'package:cloud_firestore/cloud_firestore.dart';
 import 'package:firebase_auth/firebase_auth.dart';
 import 'package:flutter/material.dart';
-import 'package:zeit/functions/flush.dart';
-import 'package:zeit/main.dart';
-import 'package:zeit/model/usermodel.dart'  ;
-import 'package:zeit/provider/upload.dart';
+import 'package:zeitt/functions/flush.dart';
+import 'package:zeitt/main.dart';
+import 'package:zeitt/model/usermodel.dart'  ;
+import 'package:zeitt/provider/upload.dart';
 import 'package:im_stepper/stepper.dart';
 import 'package:image_picker/image_picker.dart';
 import 'package:intl/intl.dart';
@@ -16,7 +16,8 @@ import '../main_pages/navigation.dart';
 
 
 class Step1 extends StatefulWidget {
-  const Step1({super.key});
+  String strr;String source;
+   Step1({super.key,required this.strr,this.source=""});
 
   @override
   State<Step1> createState() => _Step1State();
@@ -42,37 +43,44 @@ class _Step1State extends State<Step1> {
           appBar: AppBar(
             title: Text('Your Details'), automaticallyImplyLeading: true,
           ),
-          body: Padding(
-            padding: const EdgeInsets.all(8.0),
-            child: Column(
+          body: SingleChildScrollView(
+            child: Padding(
+              padding: const EdgeInsets.all(8.0),
+              child: Column(
+                children: [
+                  IconStepper(
+                    icons: [
+                      Icon(Icons.face, color : activeStep == 0 ? Colors.white : Colors.black),
+                      Icon(Icons.work, color : activeStep == 1 ? Colors.white : Colors.black),
+                      Icon(Icons.info, color : activeStep == 2 ? Colors.white : Colors.black),
+                      Icon(Icons.phone_android, color : activeStep == 3 ? Colors.white : Colors.black),
+                    ],
+                    activeStep: activeStep,stepColor: Colors.grey.shade200, activeStepColor:Colors.blue ,
+                    onStepReached: (index) {
+                      setState(() {
+                        activeStep = index;
+                      });
+                    },
+                  ),
+                  header(),
+                  s(context),
+            
+                ],
+              ),
+            ),
+          ),
+            persistentFooterButtons:[
+          Container(
+            height: 70,
+            child: Row(
+              mainAxisAlignment: MainAxisAlignment.spaceBetween,
               children: [
-                IconStepper(
-                  icons: [
-                    Icon(Icons.face, color : activeStep == 0 ? Colors.white : Colors.black),
-                    Icon(Icons.work, color : activeStep == 1 ? Colors.white : Colors.black),
-                    Icon(Icons.info, color : activeStep == 2 ? Colors.white : Colors.black),
-                    Icon(Icons.phone_android, color : activeStep == 3 ? Colors.white : Colors.black),
-                  ],
-                  activeStep: activeStep,stepColor: Colors.grey.shade200, activeStepColor:Colors.blue ,
-                  onStepReached: (index) {
-                    setState(() {
-                      activeStep = index;
-                    });
-                  },
-                ),
-                header(),
-                s(context),
-                Spacer(),
-                Row(
-                  mainAxisAlignment: MainAxisAlignment.spaceBetween,
-                  children: [
-                    previousButton(),
-                    nextButton(),
-                  ],
-                ),
+                previousButton(),
+                nextButton(),
               ],
             ),
           ),
+        ]
         ),
       ),
     );
@@ -91,9 +99,6 @@ class _Step1State extends State<Step1> {
     }
   }
 
-
-
-  /// Returns the next button.
   Widget nextButton() {
     return InkWell(
       onTap: ()  async {
@@ -103,52 +108,68 @@ class _Step1State extends State<Step1> {
             activeStep ++ ;
           });
         }else {
-          CollectionReference usersCollection = FirebaseFirestore.instance.collection('Users');
-          String h = FirebaseAuth.instance.currentUser!.uid ;
-          String hu = FirebaseAuth.instance.currentUser!.email ?? "No Email Provided";
-          print("No");
-          try {
-            UserModel u = UserModel(
-                Email: hu,
-                Name: name.text,
-                uid: h,
-                bday: bday.text,
-                education: education.text,
-                gender: gen,
-                empid: "",
-                address: phone.text,
-                country: " ",
-                state: "",
-                pic: pic,
-                lastlogin: " ",
-                online: false,
-                employee: [],
-                following: [],
-                pan: "",
-                adhaar: adhaar.text,
-                bio: bio.text,
-                reporting: "",
-                location: "",
-                role: "",
-                status: "",
-                type: "",
-                source: "",
-                joiningd: "",
-                exp: "",
-                totalexp: "",
-                identity: "", resumelink: '', resumetime: 9, link1: '', link2: '', link3: '', shit: '', salary: 0
-            );
-            print("haan be");
-            await usersCollection.doc(h).set(u.toJson());
-            Navigator.push(
-                context, PageTransition(
-                child: MyHomePage(title: 'hjh',), type: PageTransitionType.rightToLeft, duration: Duration(milliseconds: 800)
-            ));
-           Send.message(context, "Account Created Success ! Welcome ${name.text}", true);
-            print("gh");
-          } catch (e) {
-            Send.message(context, "${e}", false);
+          if(name.text.isEmpty){
+            Send.message(context, "Name is Mandatory", false);
+          }else{
+            CollectionReference usersCollection = FirebaseFirestore.instance.collection('Users');
+            String h = FirebaseAuth.instance.currentUser!.uid ;
+            String hu = FirebaseAuth.instance.currentUser!.email ?? "No Email Provided";
+            print("No");
+            try {
+              UserModel u = UserModel(
+                  Email: hu,
+                  Name: name.text,
+                  uid: h,
+                  bday: bday.text,
+                  education: education.text,
+                  gender: gen,
+                  empid: "",
+                  address: phone.text,
+                  country: " ",
+                  state: "",
+                  pic: pic,
+                  lastlogin: " ",
+                  online: false,
+                  employee: [],
+                  following: [],
+                  pan: "",
+                  adhaar: adhaar.text,
+                  bio: bio.text,
+                  reporting: "",
+                  location: "",
+                  role: "${widget.strr}",
+                  status: "",
+                  type: "${widget.strr}",
+                  source: widget.source,
+                  joiningd: "",
+                  exp: "",
+                  totalexp: "",
+                  identity: "", resumelink: '', resumetime: 9,
+                  link1: '', link2: '', link3: '', shit: '', salary: 0,
+                  meetlink: '', meetname: '', meetid: '', meetby: '',
+                  meetpic: '', meetdesc: '', bankname: '', bankaccount: '', bankaccountname: '', upiname: '', ifsccode: ''
+              );
+              print("haan be");
+              try{
+                await usersCollection.doc(h).update(u.toJson());
+              }catch(e){
+                try{
+                  await usersCollection.doc(h).set(u.toJson());
+                }catch(e){
+                  Send.message(context, "$e", false);
+                }
+              }
+              Navigator.push(
+                  context, PageTransition(
+                  child: MyHomePage(title: 'hjh',), type: PageTransitionType.rightToLeft, duration: Duration(milliseconds: 800)
+              ));
+              Send.message(context, "Account Created Success ! Welcome ${name.text}", true);
+              print("gh");
+            } catch (e) {
+              Send.message(context, "${e}", false);
+            }
           }
+
 
         }
       },

@@ -1,13 +1,14 @@
 import 'package:cloud_firestore/cloud_firestore.dart';
 import 'package:flutter/material.dart';
+import 'package:flutter_datetime_picker_plus/flutter_datetime_picker_plus.dart';
 import 'package:page_transition/page_transition.dart';
 import 'package:provider/provider.dart';
 import 'package:social_login_buttons/social_login_buttons.dart';
-import 'package:zeit/functions/task_health_events_training.dart';
-import 'package:zeit/model/usermodel.dart';
+import 'package:zeitt/functions/flush.dart';
+import 'package:zeitt/functions/task_health_events_training.dart';
+import 'package:zeitt/model/usermodel.dart';
 
 import '../provider/declare.dart';
-
 
 class ExpenseWidget extends StatefulWidget {
 
@@ -31,7 +32,7 @@ class _ExpenseWidgetState extends State<ExpenseWidget> {
   final TextEditingController yearController = TextEditingController();
 
   final TextEditingController monthController = TextEditingController();
-
+  final TextEditingController dayController = TextEditingController();
   final TextEditingController explanationController = TextEditingController();
 
   Widget dc(TextEditingController c, String label, String hint, bool number) {
@@ -60,6 +61,7 @@ class _ExpenseWidgetState extends State<ExpenseWidget> {
   @override
   Widget build(BuildContext context) {
     UserModel? _user = Provider.of<UserProvider>(context).getUser;
+    double w=MediaQuery.of(context).size.width;
     return Scaffold(
       appBar: AppBar(
         backgroundColor: Color(0xff1491C7),
@@ -109,11 +111,136 @@ class _ExpenseWidgetState extends State<ExpenseWidget> {
           ),
           dc(nameController, 'Reason for Expense', 'Enter expense name', false),
           ic(costController, 'Cost', 'Enter expense cost', true),
+          Container(
+            width: MediaQuery.of(context).size.width,
+            height: 50,
+            child: Row(
+              children: [
+                SizedBox(width: 8,),
+                Padding(
+                  padding: const EdgeInsets.all(8.0),
+                  child: InkWell(
+                    onTap: () async {
+                      DateTime? selectedDateTime = await DatePicker.showDateTimePicker(
+                        context,
+                        showTitleActions: true,
+                        minTime: DateTime(2000, 1, 1),
+                        maxTime: DateTime(2100, 12, 31),
+                        onChanged: (date) {
+                          print('Changed: $date');
+                        },
+                        onConfirm: (date) {
+                          print('Confirmed: $date');
+                        },
+                        currentTime: DateTime.now(),
+                        locale: LocaleType.en,
+                      );
 
-          dc(yearController, 'Year', 'Enter year', true),
-          dc(monthController, 'Month', 'Enter month', true),
+                      if (selectedDateTime != null) {
+                        setState(() {
+                          monthController.text = selectedDateTime.month.toString();
+                          dayController.text = selectedDateTime.day.toString();
+                          yearController.text = selectedDateTime.year.toString();
+                        });
+                      }
+                    },
+                    child: Center(
+                      child: Container(
+                        height:45,width:MediaQuery.of(context).size.width/2-20,
+                        decoration:BoxDecoration(
+                          borderRadius:BorderRadius.circular(7),
+                          color:Colors.blue,
+                          boxShadow: [
+                            BoxShadow(
+                              color: Colors.grey.withOpacity(0.4), // Shadow color with transparency
+                              spreadRadius: 5, // The extent to which the shadow spreads
+                              blurRadius: 7, // The blur radius of the shadow
+                              offset: Offset(0, 3), // The position of the shadow
+                            ),
+                          ],
+                        ),
+                        child: Center(child: Text("Choose Date/Time",style: TextStyle(
+                            color: Colors.white,
+                            fontFamily: "RobotoS",fontWeight: FontWeight.w800
+                        ),)),
+                      ),
+                    ),
+                  ),
+                ),
+              ],
+            ),
+          ),
+          Container(
+            child:Row(
+              children: [
+                SizedBox(width: 10,),
+                Container(
+                  width: w*1/4,
+                  child: Padding(
+                    padding: const EdgeInsets.all(8.0),
+                    child: TextFormField(
+                      controller: dayController,
+                      readOnly: true,
+                      decoration: InputDecoration(
+
+                        isDense: true,
+                        border: OutlineInputBorder(),
+                      ),
+                      validator: (value) {
+                        if (value!.isEmpty) {
+                          return 'Please type it';
+                        }
+                        return null;
+                      },
+                    ),
+                  ),
+                ),
+                Container(
+                  width: w*1/4,
+                  child: Padding(
+                    padding: const EdgeInsets.all(8.0),
+                    child: TextFormField(
+                      controller: monthController,
+                      readOnly: true,
+                      decoration: InputDecoration(
+
+                        isDense: true,
+                        border: OutlineInputBorder(),
+                      ),
+                      validator: (value) {
+                        if (value!.isEmpty) {
+                          return 'Please type it';
+                        }
+                        return null;
+                      },
+                    ),
+                  ),
+                ),
+                Container(
+                  width: w*2/4 - 80,
+                  child: Padding(
+                    padding: const EdgeInsets.all(8.0),
+                    child: TextFormField(
+                      controller: yearController,
+                      readOnly: true,
+                      decoration: InputDecoration(
+
+                        isDense: true,
+                        border: OutlineInputBorder(),
+                      ),
+                      validator: (value) {
+                        if (value!.isEmpty) {
+                          return 'Please type it';
+                        }
+                        return null;
+                      },
+                    ),
+                  ),
+                )
+              ],
+            ),
+          ),
           oc(explanationController, 'Explanation', 'Enter explanation', false),
-          // Add a button to save or submit the data
         ],
       ),
       persistentFooterButtons: [
@@ -122,33 +249,32 @@ class _ExpenseWidgetState extends State<ExpenseWidget> {
           child: SocialLoginButton(
               backgroundColor: Colors.blue,
               height: 40,
-              text: 'Add Notify Employees',
+              text: 'Add Expense',
               borderRadius: 20,
               fontSize: 21,
               buttonType: SocialLoginButtonType.generalLogin,
               onPressed: () async{
-
-                Expense h = Expense(
-                  name: nameController.text,
-                  cost: double.parse(costController.text),
-                  id: g,
-                  doc: docController.text,
-                  docid: docidController.text,
-                  year: yearController.text,
-                  month: monthController.text,
-                  explanation: explanationController.text,
-                );
-                await  FirebaseFirestore.instance.collection("Company")
-                    .doc(_user!.source).collection("Expense")
-                    .doc(g).set(h.toJson());
-                Navigator.pop(context);
-                Navigator.push(
-                    context,
-                    PageTransition(
-                        child: How(id: g, first4: 'Expense', topic:"A New ${nameController.text} added by ${_user.Name} for You",sdk: "Expense",
-                          message: 'A New ${nameController.text} is added by HR ${_user.Name} : ${explanationController.text}', docname:"Expense",),
-                        type: PageTransitionType.rightToLeft,
-                        duration: Duration(milliseconds: 200)));
+                if(dayController.text.isEmpty||monthController.text.isEmpty||costController.text.isEmpty){
+                  print(_user!.Name);
+                  print(_user.pic);
+                  Send.message(context, "Select Date as well as Cost", false);
+                }else{
+                  Expense h = Expense(
+                    name: nameController.text,
+                    cost: double.parse(costController.text),
+                    id: g,
+                    doc: docController.text,
+                    docid: docidController.text,
+                    year: yearController.text,
+                    month: monthController.text,
+                    explanation: explanationController.text, useruid: _user!.uid, stname: _user!.Name,
+                    stpic: _user!.pic, stdeveloper: _user.education, date: "",
+                  );
+                  await  FirebaseFirestore.instance.collection("Company")
+                      .doc(_user!.source).collection("Expense")
+                      .doc(g).set(h.toJson());
+                  Navigator.pop(context);
+                }
               }),
         ),
       ],
@@ -220,7 +346,6 @@ class _ExpenseWidgetState extends State<ExpenseWidget> {
   }
 }
 
-
 class Expense {
   late final String name;
   late final double cost;
@@ -230,6 +355,11 @@ class Expense {
   late final String year;
   late final String month;
   late final String explanation;
+  late final String useruid;   // Added useruid field
+  late final String stname;    // Added stname field
+  late final String stpic;     // Added stpic field
+  late final String stdeveloper;// Added stdeveloper field
+  late final String date;      // Added date field
 
   Expense({
     required this.name,
@@ -240,6 +370,11 @@ class Expense {
     required this.year,
     required this.month,
     required this.explanation,
+    required this.useruid,     // Required useruid
+    required this.stname,      // Required stname
+    required this.stpic,       // Required stpic
+    required this.stdeveloper, // Required stdeveloper
+    required this.date,        // Required date
   });
 
   Expense.fromJson(Map<String, dynamic> json) {
@@ -251,6 +386,11 @@ class Expense {
     year = json['year'] ?? '';
     month = json['month'] ?? '';
     explanation = json['explanation'] ?? '';
+    useruid = json['useruid'] ?? '';       // Handle useruid from JSON
+    stname = json['stname'] ?? '';         // Handle stname from JSON
+    stpic = json['stpic'] ?? '';           // Handle stpic from JSON
+    stdeveloper = json['stdeveloper'] ?? ''; // Handle stdeveloper from JSON
+    date = json['date'] ?? '';             // Handle date from JSON
   }
 
   Map<String, dynamic> toJson() {
@@ -263,6 +403,11 @@ class Expense {
     data['year'] = year;
     data['month'] = month;
     data['explanation'] = explanation;
+    data['useruid'] = useruid;         // Add useruid to JSON
+    data['stname'] = stname;           // Add stname to JSON
+    data['stpic'] = stpic;             // Add stpic to JSON
+    data['stdeveloper'] = stdeveloper; // Add stdeveloper to JSON
+    data['date'] = date;               // Add date to JSON
     return data;
   }
 }

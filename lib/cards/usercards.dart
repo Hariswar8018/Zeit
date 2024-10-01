@@ -1,15 +1,20 @@
 import 'package:calendar_date_picker2/calendar_date_picker2.dart';
+import 'package:flutter/cupertino.dart';
 import 'package:flutter/material.dart';
 import 'package:intl/intl.dart';
 import 'package:page_transition/page_transition.dart';
 import 'package:url_launcher/url_launcher.dart';
-import 'package:zeit/add/emp_history.dart';
-import 'package:zeit/cards/emphistory.dart';
-import 'package:zeit/cards/pdf.dart';
-import 'package:zeit/fee_performance/transaction.dart';
-import 'package:zeit/model/emp_history.dart';
-import 'package:zeit/model/pay.dart';
-import 'package:zeit/update/update_user.dart';
+import 'package:zeitt/add/emp_history.dart';
+import 'package:zeitt/cards/emphistory.dart';
+import 'package:zeitt/cards/pdf.dart';
+import 'package:zeitt/cards/task.dart';
+import 'package:zeitt/fee_performance/transaction.dart';
+import 'package:zeitt/fee_performance/update_bank.dart';
+import 'package:zeitt/model/emp_history.dart';
+import 'package:zeitt/model/pay.dart';
+import 'package:zeitt/services/files_see.dart';
+import 'package:zeitt/services/messagecard.dart';
+import 'package:zeitt/update/update_user.dart';
 
 import '../model/usermodel.dart';
 
@@ -23,15 +28,15 @@ import 'package:cloud_firestore/cloud_firestore.dart';
 import 'package:cloud_firestore/cloud_firestore.dart';
 import 'package:intl/intl.dart';
 
-import 'package:zeit/model/time.dart';
+import 'package:zeitt/model/time.dart';
 import 'dart:async';
 
 import '../services/attendance.dart';
 
 
 class UserC extends StatefulWidget {
-  UserModel user ; bool b;
-  UserC({super.key, required this.user, this.b=false});
+  UserModel user ; bool b;bool message;
+  UserC({super.key, required this.user, this.b=false,this.message=false});
 
   @override
   State<UserC> createState() => _UserCState();
@@ -58,6 +63,42 @@ class _UserCState extends State<UserC> {
         actions: [
           IconButton(onPressed: (){}, icon: Icon(Icons.camera_alt)),
           SizedBox(width: 10,)
+        ],
+      ),
+      floatingActionButton: Row(
+        mainAxisAlignment: MainAxisAlignment.end,
+        children: [
+          InkWell(
+            onTap: (){
+              Navigator.push(
+                  context,
+                  PageTransition(
+                      child: AddS( title: '', userr: widget.user),
+                      type: PageTransitionType.rightToLeft,
+                      duration: Duration(milliseconds: 60)));
+            },
+            child: CircleAvatar(
+              radius: 30,
+              backgroundColor: Colors.blue,
+              child: Icon(Icons.upload_file_rounded,color: Colors.white,),
+            ),
+          ),
+          SizedBox(width: 8,),
+          InkWell(
+            onTap: (){
+              Navigator.push(
+                  context,
+                  PageTransition(
+                      child: ChatPage(user: widget.user,),
+                      type: PageTransitionType.rightToLeft,
+                      duration: Duration(milliseconds: 400)));
+            },
+            child: CircleAvatar(
+              radius: 30,
+              backgroundColor: Colors.blue,
+              child: Icon(CupertinoIcons.chat_bubble_2_fill,color: Colors.white,),
+            ),
+          ),
         ],
       ),
       body: SingleChildScrollView(
@@ -127,6 +168,7 @@ class _UserCState extends State<UserC> {
       ),
     );
   }
+
   Widget other(){
     String s = FirebaseAuth.instance.currentUser!.uid;
     return Container(
@@ -276,6 +318,7 @@ class _UserCState extends State<UserC> {
       )
     );
   }
+
   Widget mwnu(int i){
     if(widget.b&&i==0){
       return r1();
@@ -299,7 +342,9 @@ class _UserCState extends State<UserC> {
   } else if(i==4){
       return emphistory();
     }else if(i==5){
-      List<PayModel> _list = [];
+      return payroll();
+  } else if(i==6){
+      List<FileModel> _list = [];
       return  Container(
         height : 200,
         child: widget.user.source==""?Center(
@@ -319,10 +364,11 @@ class _UserCState extends State<UserC> {
               SizedBox(height: 10),
             ],
           ),
-        ):StreamBuilder(
+        ):
+        StreamBuilder(
           stream: FirebaseFirestore.instance
-              .collection('Company')
-              .doc(widget.user.source).collection("Payroll").where("type",isEqualTo: FirebaseAuth.instance.currentUser!.uid)
+              .collection('Users')
+              .doc(widget.user.uid).collection("Files")
               .snapshots(),
           builder: (context, snapshot) {
             if (snapshot.connectionState == ConnectionState.waiting) {
@@ -356,83 +402,26 @@ class _UserCState extends State<UserC> {
             final data = snapshot.data?.docs;
             _list.clear();
             _list.addAll(data?.map((e) =>
-                PayModel.fromJson(e.data())).toList() ?? []);
-            return ListView.builder(
+                FileModel.fromJson(e.data())).toList() ?? []);
+            return GridView.builder(
               itemCount: _list.length,
               padding: EdgeInsets.only(top: 10),
               physics: BouncingScrollPhysics(),
+              gridDelegate: SliverGridDelegateWithFixedCrossAxisCount(
+                crossAxisCount: 2, // Number of columns
+                crossAxisSpacing: 5.0, // Space between columns
+                mainAxisSpacing: 5.0, // Space between rows
+              ),
               itemBuilder: (context, index) {
-                return Per(user: _list[index],id:"NO" );
+                return FileUser(user: _list[index]);
               },
             );
-          },
-        ),
-      );
-  } else if(i==6){
-      List<PayModel> _list = [];
-      return  Container(
-        height : 200,
-        child: widget.user.source==""?Center(
-          child: Column(
-            mainAxisAlignment: MainAxisAlignment.center,
-            children: [
-              Icon(Icons.hourglass_empty, color : Colors.red),
-              SizedBox(height: 7),
-              Text(
-                "You are not Attached to Company",
-                style: TextStyle(fontSize: 20, fontWeight: FontWeight.w600),
-              ),
-              Text(
-                "Try attaching yourself to company than come again to view Payroll",
-                style: TextStyle(fontSize: 14, fontWeight: FontWeight.w500),
-              ),
-              SizedBox(height: 10),
-            ],
-          ),
-        ):StreamBuilder(
-          stream: FirebaseFirestore.instance
-              .collection('Company')
-              .doc(widget.user.source).collection("Payroll").where("type",isEqualTo: FirebaseAuth.instance.currentUser!.uid)
-              .snapshots(),
-          builder: (context, snapshot) {
-            if (snapshot.connectionState == ConnectionState.waiting) {
-              return Center(child: CircularProgressIndicator());
-            }
-
-            if (snapshot.hasError) {
-              return Center(child: Text('Error: ${snapshot.error}'));
-            }
-
-            if (!snapshot.hasData || snapshot.data?.docs.isEmpty == true) {
-              return Center(
-                child: Column(
-                  mainAxisAlignment: MainAxisAlignment.center,
-                  children: [
-                    Icon(Icons.hourglass_empty, color : Colors.red),
-                    SizedBox(height: 7),
-                    Text(
-                      "No Templates found",
-                      style: TextStyle(fontSize: 20, fontWeight: FontWeight.w600),
-                    ),
-                    Text(
-                      "Looks likes Company haven't any Templates",
-                      style: TextStyle(fontSize: 14, fontWeight: FontWeight.w500),
-                    ),
-                    SizedBox(height: 10),
-                  ],
-                ),
-              );
-            }
-            final data = snapshot.data?.docs;
-            _list.clear();
-            _list.addAll(data?.map((e) =>
-                PayModel.fromJson(e.data())).toList() ?? []);
             return ListView.builder(
               itemCount: _list.length,
               padding: EdgeInsets.only(top: 10),
               physics: BouncingScrollPhysics(),
               itemBuilder: (context, index) {
-                return Per(user: _list[index],id:"NO" );
+                return FileUser(user: _list[index]);
               },
             );
           },
@@ -445,6 +434,110 @@ class _UserCState extends State<UserC> {
         child: Text("Hi"),
       );
     }
+  }
+  Widget payroll(){
+    List<PayModel> _list = [];
+    return  Column(
+      children: [
+        myuser()?Padding(
+          padding: const EdgeInsets.all(8.0),
+          child: InkWell(
+            onTap: (){
+              Navigator.push(
+                  context,
+                  PageTransition(
+                      child: BankSee(user: widget.user,),
+                      type: PageTransitionType.rightToLeft,
+                      duration: Duration(milliseconds: 600)));
+            },
+            child: Container(
+              width: MediaQuery.of(context).size.width,
+              height: 40,decoration: BoxDecoration(
+                color: Colors.yellow,
+                borderRadius: BorderRadius.circular(8)
+            ),
+              child: Row(
+                children: [
+                  SizedBox(width: 10,),
+                  Text("Update Bank Account",style: TextStyle(fontWeight: FontWeight.w800),),
+                  Spacer(),
+                  Icon(Icons.edit),
+                  SizedBox(width: 10,),
+                ],
+              ),
+            ),
+          ),
+        ):SizedBox(),
+        Container(
+          height : 400,
+          child: widget.user.source==""?Center(
+            child: Column(
+              mainAxisAlignment: MainAxisAlignment.center,
+              children: [
+                Icon(Icons.hourglass_empty, color : Colors.red),
+                SizedBox(height: 7),
+                Text(
+                  "You are not Attached to Company",
+                  style: TextStyle(fontSize: 20, fontWeight: FontWeight.w600),
+                ),
+                Text(
+                  "Try attaching yourself to company than come again to view Payroll",
+                  style: TextStyle(fontSize: 14, fontWeight: FontWeight.w500),
+                ),
+                SizedBox(height: 10),
+              ],
+            ),
+          ):StreamBuilder(
+            stream: FirebaseFirestore.instance
+                .collection('Company')
+                .doc(widget.user.source).collection("Payroll").where("type",isEqualTo: FirebaseAuth.instance.currentUser!.uid)
+                .snapshots(),
+            builder: (context, snapshot) {
+              if (snapshot.connectionState == ConnectionState.waiting) {
+                return Center(child: CircularProgressIndicator());
+              }
+
+              if (snapshot.hasError) {
+                return Center(child: Text('Error: ${snapshot.error}'));
+              }
+
+              if (!snapshot.hasData || snapshot.data?.docs.isEmpty == true) {
+                return Center(
+                  child: Column(
+                    mainAxisAlignment: MainAxisAlignment.center,
+                    children: [
+                      Icon(Icons.hourglass_empty, color : Colors.red),
+                      SizedBox(height: 7),
+                      Text(
+                        "No Templates found",
+                        style: TextStyle(fontSize: 20, fontWeight: FontWeight.w600),
+                      ),
+                      Text(
+                        "Looks likes Company haven't any Payroll for you",
+                        style: TextStyle(fontSize: 14, fontWeight: FontWeight.w500),
+                      ),
+                      SizedBox(height: 10),
+                    ],
+                  ),
+                );
+              }
+              final data = snapshot.data?.docs;
+              _list.clear();
+              _list.addAll(data?.map((e) =>
+                  PayModel.fromJson(e.data())).toList() ?? []);
+              return ListView.builder(
+                itemCount: _list.length,
+                padding: EdgeInsets.only(top: 10),
+                physics: BouncingScrollPhysics(),
+                itemBuilder: (context, index) {
+                  return Per(user: _list[index],id:"NO" );
+                },
+              );
+            },
+          ),
+        ),
+      ],
+    );
   }
 
   bool myuser(){
@@ -850,7 +943,7 @@ class _UserCState extends State<UserC> {
           SizedBox(height: 50,),
           u("Basic Information"),
           uu("Employee ID"),
-          uuu("ZEIT"+widget.user.uid),
+          uuu("zeitt"+widget.user.uid),
           uu("Date of Birth"),
           uuu(widget.user.bday),
           SizedBox(height: 50,),
@@ -1125,6 +1218,7 @@ class _UserCState extends State<UserC> {
     String formattedDate = DateFormat('dd/MM/yyyy').format(dateTime);
     return formattedDate;
   }
+
   String _getValueText(CalendarDatePicker2Type datePickerType, List<DateTime?> values) {
     values =
         values.map((e) => e != null ? DateUtils.dateOnly(e) : null).toList();

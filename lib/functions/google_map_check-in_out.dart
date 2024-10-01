@@ -9,10 +9,10 @@ import 'package:intl/intl.dart';
 import 'package:provider/provider.dart';
 import 'package:slide_countdown/slide_countdown.dart';
 import 'package:social_login_buttons/social_login_buttons.dart';
-import 'package:zeit/functions/search.dart';
-import 'package:zeit/model/training.dart';
-import 'package:zeit/model/usermodel.dart';
-import 'package:zeit/provider/declare.dart';
+import 'package:zeitt/functions/search.dart';
+import 'package:zeitt/model/training.dart';
+import 'package:zeitt/model/usermodel.dart';
+import 'package:zeitt/provider/declare.dart';
 import 'package:location2/location2.dart';
 
 class Google_F extends StatelessWidget {
@@ -22,12 +22,13 @@ class Google_F extends StatelessWidget {
   @override
   Widget build(BuildContext context) {
     return UltraMapPlacePicker(
-      googleApiKey: 'AIzaSyBJQJDrsf-P7ZOYW0JsyLyXi_pot9vJMqw',
+      googleApiKey: 'AIzaSyABt5VNuIdaU0DOjQG6fzB81Z1EPWXtjYg',
       initialPosition: LocationModel(lat, lon),
       mapTypes:(isHuaweiDevice)=>isHuaweiDevice?  [UltraMapType.normal]:UltraMapType.values,
       myLocationButtonCooldown: 1,
     resizeToAvoidBottomInset: false,enableMyLocationButton: true,enableMapTypeButton: true,
-      useCurrentLocation: true,onPlacePicked: (PickResultModel){
+      useCurrentLocation: true,
+      onPlacePicked: (PickResultModel){
       if (PickResultModel != null && PickResultModel.geometry != null) {
         Navigator.pop(context, {
           'lat': PickResultModel.geometry!.location.lat,

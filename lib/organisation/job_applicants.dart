@@ -3,9 +3,9 @@ import 'package:firebase_auth/firebase_auth.dart';
 import 'package:flutter/material.dart';
 import 'package:page_transition/page_transition.dart';
 import 'package:url_launcher/url_launcher.dart';
-import 'package:zeit/cards/jobcard.dart';
-import 'package:zeit/model/job.dart';
-import 'package:zeit/model/usermodel.dart';
+import 'package:zeitt/cards/jobcard.dart';
+import 'package:zeitt/model/job.dart';
+import 'package:zeitt/model/usermodel.dart';
 
 import '../cards/pdf.dart';
 import '../cards/usercards.dart';

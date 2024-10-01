@@ -1,17 +1,17 @@
 import 'package:cloud_firestore/cloud_firestore.dart';
 import 'package:flutter/material.dart';
-import 'package:zeit/fee_performance/new_expense.dart';
-import 'package:zeit/model/training.dart';
+import 'package:zeitt/fee_performance/new_expense.dart';
+import 'package:zeitt/model/training.dart';
 import 'dart:typed_data' as lk ;
 import 'package:calendar_date_picker2/calendar_date_picker2.dart';
 import 'package:cloud_firestore/cloud_firestore.dart';
 import 'package:firebase_auth/firebase_auth.dart';
 import 'package:flutter/material.dart';
-import 'package:zeit/main.dart';
-import 'package:zeit/main_pages/navigation.dart';
-import 'package:zeit/model/organisation.dart';
-import 'package:zeit/model/usermodel.dart'  ;
-import 'package:zeit/provider/upload.dart';
+import 'package:zeitt/main.dart';
+import 'package:zeitt/main_pages/navigation.dart';
+import 'package:zeitt/model/organisation.dart';
+import 'package:zeitt/model/usermodel.dart'  ;
+import 'package:zeitt/provider/upload.dart';
 import 'package:calendar_date_picker2/calendar_date_picker2.dart';
 import 'package:cloud_firestore/cloud_firestore.dart';
 import 'package:firebase_auth/firebase_auth.dart';
@@ -20,8 +20,8 @@ import 'package:intl/intl.dart';
 import 'package:page_transition/page_transition.dart';
 import 'package:provider/provider.dart';
 import 'package:social_login_buttons/social_login_buttons.dart';
-import 'package:zeit/model/task_class.dart';
-import 'package:zeit/provider/declare.dart';
+import 'package:zeitt/model/task_class.dart';
+import 'package:zeitt/provider/declare.dart';
 import 'package:image_picker/image_picker.dart';
 import '../functions/task_health_events_training.dart';
 import '../model/usermodel.dart';
@@ -314,6 +314,7 @@ String pic="https://www.learnworlds.com/app/uploads/2021/03/employees-working-wi
                         .month
                         .toString(),
                     explanation: "Expense for new Training ${companyController.text} organised by ${nameController.text}",
+                    useruid: '', stname: '', stpic: '', stdeveloper: '', date: '',
                   );
                   await FirebaseFirestore.instance.collection("Company")
                       .doc(_user!.source).collection("Expense")

@@ -2,11 +2,11 @@ import 'package:cloud_firestore/cloud_firestore.dart';
 import 'package:flutter/material.dart';
 import 'package:page_transition/page_transition.dart';
 import 'package:provider/provider.dart';
-import 'package:zeit/add/add_task.dart';
-import 'package:zeit/cards/task.dart';
-import 'package:zeit/model/task_class.dart';
-import 'package:zeit/model/usermodel.dart';
-import 'package:zeit/provider/declare.dart';
+import 'package:zeitt/add/add_task.dart';
+import 'package:zeitt/cards/task.dart';
+import 'package:zeitt/model/task_class.dart';
+import 'package:zeitt/model/usermodel.dart';
+import 'package:zeitt/provider/declare.dart';
 
 class Taskk extends StatelessWidget {
   Taskk({super.key,required this.hr});bool hr;
@@ -29,12 +29,44 @@ class Taskk extends StatelessWidget {
           ),
         ),
       ),
-      floatingActionButton:hr?InkWell(
+      floatingActionButton:InkWell(
         onTap: (){
+          Task hj = Task(
+            name: "hgg",
+            id: "1",
+            hrid: "hr123",
+            hrname: "HR Name",
+            comid: "com456",
+            followers: [],  // List of followers, empty for now
+            benefit: [],    // List of benefits, empty for now
+            description: "Sample description",
+            startdate: "2024-09-23",
+            enddate: "2024-09-30",
+            priority: "High",
+            status: "Pending",
+            pic: "pic_url",
+            assigndate: "2024-09-22",
+            lat: 12.34,
+            lon: 56.78,
+            client_name: "Client Name",
+            client_id: "client123",
+            category: "Category",
+            invited: 10,
+            complete: 5,
+            progress: 50,
+            Pending: [],        // List of pending tasks
+            Completed: [],      // List of completed tasks
+            Ignored: [],        // List of ignored tasks
+            Incompleted: [],    // List of incompleted tasks
+            hr: true,           // Boolean value for hr
+            nameol: "nameol",
+            namepicol: "namepicol",
+            etol: "etol",
+          );
           Navigator.push(
               context,
               PageTransition(
-                  child: AddTask(),
+                  child: AddTask(hj: hj, on: false,),
                   type: PageTransitionType.rightToLeft,
                   duration: Duration(milliseconds: 50)));
         },
@@ -55,7 +87,7 @@ class Taskk extends StatelessWidget {
             ),
           ),
         ),
-      ):SizedBox(),
+      ),
       body: StreamBuilder(
         stream: FirebaseFirestore.instance
             .collection('Company')

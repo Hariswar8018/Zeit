@@ -51,7 +51,7 @@ class DefaultFirebaseOptions {
 
   static const FirebaseOptions android = FirebaseOptions(
     apiKey: 'AIzaSyAqba9hAxCoraCvcAiioytL8CdedGdax28',
-    appId: '1:1056015985966:android:1ec46fda7c20a5b0001ebf',
+    appId: '1:1056015985966:android:6f57a4ddd341fcf4001ebf',
     messagingSenderId: '1056015985966',
     projectId: 'zeit-554a2',
     storageBucket: 'zeit-554a2.appspot.com',
@@ -59,10 +59,12 @@ class DefaultFirebaseOptions {
 
   static const FirebaseOptions ios = FirebaseOptions(
     apiKey: 'AIzaSyALwM6AatFExcN0Dgz3PR2t_c7uwuiF6rg',
-    appId: '1:1056015985966:ios:e71bdddfd1866d41001ebf',
+    appId: '1:1056015985966:ios:a8d26da484f4fa78001ebf',
     messagingSenderId: '1056015985966',
     projectId: 'zeit-554a2',
     storageBucket: 'zeit-554a2.appspot.com',
-    iosBundleId: 'com.heavenonthisearth.zeit',
+    androidClientId: '1056015985966-06ql9o7v1gltcunmnnu5mo9bpp4k9h9h.apps.googleusercontent.com',
+    iosClientId: '1056015985966-idkusrehevnn41hhtsfbvhmv99jqf7j7.apps.googleusercontent.com',
+    iosBundleId: 'com.starwish.zeitt',
   );
 }

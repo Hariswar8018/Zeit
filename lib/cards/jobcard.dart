@@ -5,11 +5,11 @@ import 'package:flutter/material.dart';
 import 'package:intl/intl.dart';
 import 'package:page_transition/page_transition.dart';
 import 'package:url_launcher/url_launcher.dart';
-import 'package:zeit/cards/pdf.dart';
-import 'package:zeit/cards/usercards.dart';
-import 'package:zeit/functions/flush.dart';
-import 'package:zeit/model/job.dart';
-import 'package:zeit/model/usermodel.dart';
+import 'package:zeitt/cards/pdf.dart';
+import 'package:zeitt/cards/usercards.dart';
+import 'package:zeitt/functions/flush.dart';
+import 'package:zeitt/model/job.dart';
+import 'package:zeitt/model/usermodel.dart';
 
 import 'jobs_full.dart';
 

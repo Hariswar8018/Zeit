@@ -1,7 +1,7 @@
 import 'package:cloud_firestore/cloud_firestore.dart';
 import 'package:flutter/material.dart';
-import 'package:zeit/model/organisation.dart';
-import 'package:zeit/model/usermodel.dart';
+import 'package:zeitt/model/organisation.dart';
+import 'package:zeitt/model/usermodel.dart';
 
 class Shifts extends StatefulWidget {
   OrganisationModel user;
@@ -202,7 +202,7 @@ class ChatU extends StatelessWidget {
               backgroundImage: NetworkImage(user.pic),
             ),
             title: Text(user.Name,style:TextStyle(fontWeight: FontWeight.w700,fontSize: 20)),
-            subtitle: Text(user.bio),
+            subtitle: Text(user.education),
           ),
           Row(
             children: [
@@ -216,7 +216,7 @@ class ChatU extends StatelessWidget {
               rt("Weekend Shift",user.shit),
               rt("Overtime Shift",user.shit),
             ],
-          )
+          ),
         ],
       ),
     );
