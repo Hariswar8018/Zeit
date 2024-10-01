@@ -1,15 +1,25 @@
 import 'package:cloud_firestore/cloud_firestore.dart';
 import 'package:flutter/material.dart';
 import 'package:page_transition/page_transition.dart';
+import 'package:provider/provider.dart';
 import 'package:zeit/add/add_travel.dart';
 import 'package:zeit/functions/search.dart';
 import 'package:zeit/model/usermodel.dart';
+import 'package:zeit/provider/declare.dart';
 
 class TravelC extends StatelessWidget {
    TravelC({super.key,required this.id});String id;
   List<Travel> _list = [];
+   bool ishr(UserModel user){
+     if(user.type=="Individual"){
+       return false;
+     }else{
+       return true;
+     }
+   }
   @override
   Widget build(BuildContext context) {
+    UserModel? _user = Provider.of<UserProvider>(context).getUser;
     return Scaffold(
       appBar: AppBar(
         backgroundColor: Color(0xff1491C7),
@@ -70,7 +80,7 @@ class TravelC extends StatelessWidget {
           );
         },
       ),
-      floatingActionButton: FloatingActionButton(
+      floatingActionButton: ishr(_user!)?FloatingActionButton(
         onPressed: (){
           Navigator.push(
               context,
@@ -80,7 +90,7 @@ class TravelC extends StatelessWidget {
                   duration: Duration(milliseconds: 200)));
         },
         child: Icon(Icons.add),
-      ),
+      ):SizedBox(),
     );
   }
 }

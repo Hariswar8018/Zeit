@@ -36,13 +36,13 @@ dependencies:
   # The following adds the Cupertino Icons font to your application.
   # Use with the CupertinoIcons class for iOS style icons.
   cupertino_icons: ^1.0.6
-  firebase_core: ^2.10.0
-  firebase_auth: ^4.4.2
+  firebase_core: ^3.5.0
+  firebase_auth: ^5.3.0
   page_transition: ^2.0.9
   social_login_buttons: ^1.0.7
   shared_preferences: ^2.1.0
-  firebase_storage: ^11.1.2
-  cloud_firestore: ^4.6.0
+  firebase_storage: ^12.3.1
+  cloud_firestore: ^5.4.2
   introduction_screen: ^3.1.12
   im_stepper: ^1.0.1+1
   provider: ^6.1.2
@@ -60,7 +60,7 @@ dependencies:
   file_picker: ^8.0.6
   http: ^1.2.1
   flutter_timer_countdown: ^1.0.7
-  firebase_messaging: ^14.7.9
+  firebase_messaging: ^15.1.2
   flutter_local_notifications: ^17.1.2
   firebase_cloud_messaging_flutter: ^1.0.6
   pie_chart: ^5.3.2
@@ -70,8 +70,12 @@ dependencies:
   flutter_to_pdf: ^0.2.2
   google_maps_flutter: ^2.9.0
   location2: ^6.0.2
-  syncfusion_flutter_pdfviewer: ^26.2.11
+  syncfusion_flutter_pdfviewer: ^27.1.48
   another_flushbar: ^1.12.30
+  add_2_calendar: ^3.0.1
+  image_gallery_saver_plus: ^3.0.5
+  permission_handler: ^11.3.1
+  google_sign_in: ^6.1.0
 
 dev_dependencies:
   flutter_test:
@@ -82,8 +86,8 @@ dev_dependencies:
   # activated in the `analysis_options.yaml` file located at the root of your
   # package. See that file for information about deactivating specific lint
   # rules and activating additional ones.
-  flutter_lints: ^3.0.0
-  flutter_launcher_icons: ^0.13.1
+  flutter_lints: ^4.0.0
+  flutter_launcher_icons: ^0.14.0
 
 flutter_launcher_icons:
   android: "launcher_icon"

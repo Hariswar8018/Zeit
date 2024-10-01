@@ -60,6 +60,27 @@ class HrLetters extends StatelessWidget {
                         duration: Duration(milliseconds: 600)));
               },
               child: a(Icon(Icons.accessible_forward,color :  Colors.blue), "Experience Letter", "Track Performances / Extras")),
+
+          InkWell(
+              onTap: (){
+                Navigator.push(
+                    context,
+                    PageTransition(
+                        child: Hr(str : "Salary Certificate"),
+                        type: PageTransitionType.leftToRight,
+                        duration: Duration(milliseconds: 600)));
+              },
+              child: a(Icon(Icons.monetization_on,color :  Colors.red), "Salary Letter", "Certificate for Income/Salary Proof")),
+          InkWell(
+              onTap: (){
+                Navigator.push(
+                    context,
+                    PageTransition(
+                        child: Hr(str : "Resignation"),
+                        type: PageTransitionType.leftToRight,
+                        duration: Duration(milliseconds: 600)));
+              },
+              child: a(Icon(Icons.exit_to_app_rounded,color :  Colors.deepPurpleAccent), "Resignation Letter", "Ask for Resignation from Company")),
         ]
       ),
     );

@@ -14,7 +14,9 @@ import '../functions/task_health_events_training.dart';
 import '../model/usermodel.dart';
 
 class AddTask extends StatefulWidget {
-   AddTask({super.key});
+  Task hj;
+bool on;
+   AddTask({super.key,required this.hj,required this.on});
 
   @override
   State<AddTask> createState() => _AddTaskState();
@@ -25,21 +27,34 @@ class _AddTaskState extends State<AddTask> {
   void initState(){
     status.text = "Active" ;
     name.text="Ayushman";
+
+    if(widget.on){
+      name.text=widget.hj.name;
+      title.text=widget.hj.name;
+      desc.text=widget.hj.description;
+      stday.text=widget.hj.startdate;
+      edday.text=widget.hj.enddate;
+      st=widget.hj.priority;
+      status.text=widget.hj.status;
+      lat.text=widget.hj.lat.toString();
+      lon.text=widget.hj.lon.toString();
+      address.text=widget.hj.assigndate;
+      cn.text=widget.hj.client_name;
+      ci.text=widget.hj.client_id;
+      category.text=widget.hj.category;
+    }
+
   }
    TextEditingController name = TextEditingController();
-
    TextEditingController title = TextEditingController();
-
    TextEditingController desc = TextEditingController();
    TextEditingController status = TextEditingController();
   TextEditingController stday = TextEditingController();
   TextEditingController edday = TextEditingController();
-
   TextEditingController add = TextEditingController();
   TextEditingController cn = TextEditingController();
   TextEditingController ci = TextEditingController();
   TextEditingController category = TextEditingController();
-
   TextEditingController lat = TextEditingController();
   TextEditingController lon = TextEditingController();
   TextEditingController address = TextEditingController();
@@ -221,29 +236,58 @@ class _AddTaskState extends State<AddTask> {
                     startdate: stday.text, enddate: edday.text, priority: st,
                     status: status.text, pic: _user.pic, lat: _isChecked?double.parse(lat.text):0.0, lon: _isChecked? double.parse(lon.text):0.0,
                   assigndate: address.text, client_name: cn.text, client_id: ci.text, category: category.text,
-                  invited: 0, complete: 0, progress: 0, Completed: [], Ignored: [], Pending: [], Incompleted: [],
+                  invited: 0, complete: 0, progress: 0, Completed: [], Ignored: [], Pending: [], Incompleted: [], hr: ishr(_user),
+                  nameol: _user.Name, namepicol: _user.pic, etol: _user.education,
                 );
-                try{
+                if(widget.on){
+                  Task hh = Task(name: title.text, id: widget.hj.id, hrid: widget.hj.hrid,
+                    hrname: widget.hj.hrname, comid: widget.hj.comid, followers: widget.hj.followers,
+                    benefit: widget.hj.benefit, description: desc.text,
+                    startdate: stday.text, enddate: edday.text, priority: st,
+                    status: status.text, pic: widget.hj.pic, lat: _isChecked?double.parse(lat.text):0.0, lon: _isChecked? double.parse(lon.text):0.0,
+                    assigndate: address.text, client_name: cn.text, client_id: ci.text, category: category.text,
+                    invited: widget.hj.invited, complete: widget.hj.complete, progress: widget.hj.progress,
+                    Completed: widget.hj.Completed, Ignored: widget.hj.Ignored, Pending: widget.hj.Pending, Incompleted: widget.hj.Incompleted,
+                    hr: ishr(_user), nameol: widget.hj.nameol, namepicol: widget.hj.namepicol, etol: widget.hj.etol,
+                  );
                   await  FirebaseFirestore.instance.collection("Company")
                       .doc(_user.source).collection("Tasks")
-                      .doc(g).update(h.toJson());
-                }catch(e){
-                  await  FirebaseFirestore.instance.collection("Company")
-                      .doc(_user.source).collection("Tasks")
-                      .doc(g).set(h.toJson());
+                      .doc(widget.hj.id).update(hh.toJson());
+                  Navigator.pop(context);
+                }else{
+                  try{
+                    await  FirebaseFirestore.instance.collection("Company")
+                        .doc(_user.source).collection("Tasks")
+                        .doc(g).update(h.toJson());
+                  }catch(e){
+                    await  FirebaseFirestore.instance.collection("Company")
+                        .doc(_user.source).collection("Tasks")
+                        .doc(g).set(h.toJson());
+                  }
+                  Navigator.push(
+                      context,
+                      PageTransition(
+                          child: How(id: g, first4: 'TASK', topic:"A New Task added by ${_user.Name}",sdk:"Tasks",
+                            message: 'A New Task is added by Admin by ${_user.Name} : ${title.text}', docname: 'Tasks',),
+                          type: PageTransitionType.rightToLeft,
+                          duration: Duration(milliseconds: 200)));
                 }
-                Navigator.push(
-                    context,
-                    PageTransition(
-                        child: How(id: g, first4: 'TASK', topic:"A New Task added by ${_user.Name}",sdk:"Tasks",
-                          message: 'A New Task is added by Admin by ${_user.Name} : ${title.text}', docname: 'Tasks',),
-                        type: PageTransitionType.rightToLeft,
-                        duration: Duration(milliseconds: 200)));
+
               }),
         ),
       ],
     );
   }
+
+  bool ishr(UserModel user){
+    if(user.type=="Individual"){
+      return false;
+    }else{
+      return true;
+    }
+  }
+
+
  String st = "Moderate" ;
   Widget rt(String jh){
     return InkWell(

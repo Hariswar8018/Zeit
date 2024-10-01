@@ -165,16 +165,19 @@ class _RequestCState extends State<RequestC> {
                         ),
                       ),
                       SizedBox(width : 15),
-                      Column(
-                        mainAxisAlignment: MainAxisAlignment.start,
-                        crossAxisAlignment: CrossAxisAlignment.start,
-                        children: [
-                          Text(widget.user.name, style : TextStyle(fontWeight: FontWeight.w800,fontSize: 21)),
-                          Text(sy(widget.user.time), style : TextStyle(fontWeight: FontWeight.w300,fontSize: 10)),
-                          SizedBox(height : 9),
-                          !widget.b? Text(widget.user.reason):Text(widget.user.topic + " Letter"),
-                          widget.user.topic=="Leave Application"?Text("From "+io(widget.user.date1)+" to "+io(widget.user.date2), style : TextStyle(fontWeight: FontWeight.w500,fontSize: 10)):SizedBox(),
-                        ],
+                      Container(
+                        width: MediaQuery.of(context).size.width/2-20,
+                        child: Column(
+                          mainAxisAlignment: MainAxisAlignment.start,
+                          crossAxisAlignment: CrossAxisAlignment.start,
+                          children: [
+                            Text(widget.user.name, style : TextStyle(fontWeight: FontWeight.w800,fontSize: 21)),
+                            Text(sy(widget.user.time), style : TextStyle(fontWeight: FontWeight.w300,fontSize: 10)),
+                            SizedBox(height : 9),
+                            !widget.b? Text(widget.user.reason):Text(widget.user.topic + " Letter"),
+                            widget.user.topic=="Leave Application"?Text("From "+io(widget.user.date1)+" to "+io(widget.user.date2), style : TextStyle(fontWeight: FontWeight.w500,fontSize: 10)):SizedBox(),
+                          ],
+                        ),
                       ),
                       Spacer(),
                       Container(

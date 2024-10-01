@@ -23,6 +23,7 @@ class L1 extends StatefulWidget {
 class _L1State extends State<L1> {
   List j=[];
 // Create the list with today's date and the date 4 days later
+
   List<DateTime?> _rangeDatePickerValueWithDefaultValue = [
     DateTime.now(),
     DateTime.now().add(Duration(days: 4)),
@@ -50,6 +51,30 @@ TextEditingController cont = TextEditingController();
     )
     );
   }
+
+  TextEditingController tty=TextEditingController();
+  Widget rtj(String jh){
+    return InkWell(
+        onTap : (){
+          setState(() {
+            tty.text = jh ;
+          });
+        }, child : Padding(
+      padding: const EdgeInsets.all(8.0),
+      child: Container(
+          decoration: BoxDecoration(
+            color: tty.text==jh ? Colors.blue : Colors.grey.shade100, // Background color of the container
+            borderRadius: BorderRadius.circular(15.0), // Rounded corners
+          ),
+          child : Padding(
+            padding: const EdgeInsets.all(10.0),
+            child: Text(jh, style : TextStyle(fontSize: 19, color :  tty.text == jh ? Colors.white : Colors.black )),
+          )
+      ),
+    )
+    );
+  }
+
   @override
   Widget build(BuildContext context) {
     UserModel? _user = Provider.of<UserProvider>(context).getUser;
@@ -89,6 +114,13 @@ TextEditingController cont = TextEditingController();
                     rt("Marriage Leave"),  rt("Compensatory Off"),
                   ],
                 ),
+                SizedBox(height: 8,),
+                Text("    Type of Leave",style:TextStyle(fontWeight: FontWeight.w600,fontSize: 21)),
+                Row(
+                  children: [
+                    rtj("Full Day Leave"),  rtj("Half Day Leave"),
+                  ],
+                ),
                 a(cont),
               ]
           ),
@@ -121,9 +153,9 @@ TextEditingController cont = TextEditingController();
                   String g = DateTime.now().millisecondsSinceEpoch.toString();
                   String ui = FirebaseAuth.instance.currentUser!.uid;
                   Request ty = Request(name: _user!.Name, designation: _user!.education,
-                      joining: _user.uid, request: "Leave Application",
+                      joining: _user.uid, request: "Leave Application for ${tty.text}",
                       change: true, reason: cont.text, userid: ui,
-                      id: g, topic: "Leave Application", queries: false,
+                      id: g, topic: "Leave Application for ${tty.text}", queries: false,
                       description: "", attachment: "",
                       status: "Active", time: g, response: "",
                       pic: _user!.pic, date1: _rangeDatePickerValueWithDefaultValue[0].toString(),
@@ -152,6 +184,7 @@ TextEditingController cont = TextEditingController();
       ],
     );
   }
+
   Widget a(TextEditingController c){
     return Padding(
       padding: const EdgeInsets.only( bottom : 10.0,left:10,right:10),

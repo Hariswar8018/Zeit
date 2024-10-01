@@ -31,10 +31,42 @@ class Taskk extends StatelessWidget {
       ),
       floatingActionButton:hr?InkWell(
         onTap: (){
+          Task hj = Task(
+            name: "hgg",
+            id: "1",
+            hrid: "hr123",
+            hrname: "HR Name",
+            comid: "com456",
+            followers: [],  // List of followers, empty for now
+            benefit: [],    // List of benefits, empty for now
+            description: "Sample description",
+            startdate: "2024-09-23",
+            enddate: "2024-09-30",
+            priority: "High",
+            status: "Pending",
+            pic: "pic_url",
+            assigndate: "2024-09-22",
+            lat: 12.34,
+            lon: 56.78,
+            client_name: "Client Name",
+            client_id: "client123",
+            category: "Category",
+            invited: 10,
+            complete: 5,
+            progress: 50,
+            Pending: [],        // List of pending tasks
+            Completed: [],      // List of completed tasks
+            Ignored: [],        // List of ignored tasks
+            Incompleted: [],    // List of incompleted tasks
+            hr: true,           // Boolean value for hr
+            nameol: "nameol",
+            namepicol: "namepicol",
+            etol: "etol",
+          );
           Navigator.push(
               context,
               PageTransition(
-                  child: AddTask(),
+                  child: AddTask(hj: hj, on: false,),
                   type: PageTransitionType.rightToLeft,
                   duration: Duration(milliseconds: 50)));
         },

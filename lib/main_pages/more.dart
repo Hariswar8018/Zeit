@@ -9,6 +9,7 @@ import 'package:zeit/fee_performance/performance_user.dart';
 import 'package:zeit/model/usermodel.dart';
 import 'package:zeit/organisation/change.dart';
 import 'package:zeit/provider/declare.dart';
+import 'package:zeit/services/files_see.dart';
 import 'package:zeit/services/leave.dart';
 import 'package:zeit/superadmin/admin_login.dart';
 
@@ -92,7 +93,26 @@ class More extends StatelessWidget {
                             duration: Duration(milliseconds: 200)));
                 },
                 child: a(Icon(Icons.leaderboard,color :  Colors.blue), "Performance", "Track Performances / Extras")),
-            a(Icon(Icons.file_copy,color :  Colors.black), "Files", "Discover Files Shared / Uploaded"),
+            InkWell(
+                onTap: (){
+                  Navigator.push(
+                      context,
+                      PageTransition(
+                          child: Change(),
+                          type: PageTransitionType.rightToLeft,
+                          duration: Duration(milliseconds: 200)));
+                },
+                child: a(Icon(Icons.leaderboard,color :  Colors.blue), "Test", "Test fmhfjjkf")),
+            InkWell(
+                onTap: (){
+                  Navigator.push(
+                      context,
+                      PageTransition(
+                          child: File_See(str: _user!.uid,),
+                          type: PageTransitionType.rightToLeft,
+                          duration: Duration(milliseconds: 60)));
+                },
+                child: a(Icon(Icons.file_copy,color :  Colors.black), "Files", "Discover Files Shared / Uploaded")),
             InkWell(
                 onTap: (){
                   Navigator.push(
@@ -105,7 +125,6 @@ class More extends StatelessWidget {
                 child: a(Icon(Icons.person,color :  Colors.purpleAccent), "User Profile", "See / Manage your all Profile")),
             InkWell(
                 onTap: () async {
-
                   String  uid = FirebaseAuth.instance.currentUser!.uid ;
                   try {
                     // Reference to the 'users' collection
@@ -122,7 +141,9 @@ class More extends StatelessWidget {
                               child: ProO(user: user,),
                               type: PageTransitionType.rightToLeft,
                               duration: Duration(milliseconds: 600)));
-                    } else {
+                    } else if(_user!.type=="Individual") {
+                      Send.message(context, "This function will work once you are Attached to Organisation", false);
+                    }else{
                       await showDialog(
                         context: context,
                         builder: (BuildContext context) {
@@ -156,22 +177,10 @@ class More extends StatelessWidget {
                           );
                         },
                       );
-
                     }
                   } catch (e) {
                     print("Error fetching user by uid: $e");
                     Send.message(context, "$e", false);
-                  }
-                },onLongPress: (){
-                  String? st = FirebaseAuth.instance.currentUser!.email;
-                  if(st=="hari@g.com"||st=="hariswarsamasi@gmail.com"||st=="brnrinnovations@gmail.com"){
-                    print("Ayus");
-                    Navigator.push(
-                        context,
-                        PageTransition(
-                            child: AdminLogin(),
-                            type: PageTransitionType.leftToRight,
-                            duration: Duration(milliseconds: 400)));
                   }
             },
                 child: a(Icon(Icons.business,color :  Colors.deepPurpleAccent), "Organisation", "Settings your Organisation Level")),
@@ -225,7 +234,6 @@ class More extends StatelessWidget {
                     );
                   },
                 );
-
               }, icon: Icon(Icons.login, color : Colors.red,size: 35,)),
               IconButton(onPressed: () async {
                 await showDialog(

@@ -9,6 +9,7 @@ import 'package:provider/provider.dart';
 import 'package:social_login_buttons/social_login_buttons.dart';
 import 'package:url_launcher/url_launcher.dart';
 import 'package:zeit/cards/usercards.dart';
+import 'package:zeit/functions/flush.dart';
 import 'package:zeit/functions/google_map_check-in_out.dart';
 import 'package:zeit/functions/search.dart';
 import 'package:zeit/model/feeds.dart';
@@ -107,7 +108,7 @@ class _ProOState extends State<ProO> {
                           if (file != null) {
                             String photoUrl = await StorageMethods().uploadImageToStorage(
                                 'Company', file, true);
-                            await FirebaseFirestore.instance.collection("Company").doc(widget.user.uid).update({
+                            await FirebaseFirestore.instance.collection("Company").doc(widget.user.id).update({
                               "pic1":photoUrl,
                             });
                           }
@@ -173,7 +174,7 @@ class _ProOState extends State<ProO> {
                                 myuser()?IconButton(icon:Icon(Icons.edit,size: 23,color: Colors.green,),onPressed:(){
                                   Navigator.push(
                                       context, PageTransition(
-                                      child: Update(Name: 'Small Description', doc: widget.user.uid, Firebasevalue: 'desc', Collection: 'Company', ), type: PageTransitionType.rightToLeft, duration: Duration(milliseconds: 200)
+                                      child: Update(Name: 'Small Description', doc: widget.user.id, Firebasevalue: 'desc', Collection: 'Company', ), type: PageTransitionType.rightToLeft, duration: Duration(milliseconds: 200)
                                   ));
                                 }):SizedBox(),
                               ],
@@ -192,7 +193,7 @@ class _ProOState extends State<ProO> {
                 myuser()?IconButton(icon:Icon(Icons.edit,size: 23,color: Colors.green,),onPressed:(){
                   Navigator.push(
                       context, PageTransition(
-                      child: Update(Name: "Phone", doc: widget.user.uid, Firebasevalue: 'phone', Collection: 'Company', ), type: PageTransitionType.rightToLeft, duration: Duration(milliseconds: 200)
+                      child: Update(Name: "Phone", doc: widget.user.id, Firebasevalue: 'phone', Collection: 'Company', ), type: PageTransitionType.rightToLeft, duration: Duration(milliseconds: 200)
                   ));
                 }):SizedBox(),
               ],
@@ -203,7 +204,7 @@ class _ProOState extends State<ProO> {
                 myuser()?IconButton(icon:Icon(Icons.edit,size: 23,color: Colors.green,),onPressed:(){
                   Navigator.push(
                       context, PageTransition(
-                      child: Update(Name: 'Email', doc: widget.user.uid, Firebasevalue: 'email', Collection: 'Company', ), type: PageTransitionType.rightToLeft, duration: Duration(milliseconds: 200)
+                      child: Update(Name: 'Email', doc: widget.user.id, Firebasevalue: 'email', Collection: 'Company', ), type: PageTransitionType.rightToLeft, duration: Duration(milliseconds: 200)
                   ));
                 }):SizedBox(),
               ],
@@ -375,14 +376,14 @@ class _ProOState extends State<ProO> {
         ):SizedBox(),
         r( Icon(Icons.calendar_month, color : Colors.red),"Date of Est. : " + widget.user.bday),
         r( Icon(Icons.business, color : Colors.blue),"Incor. Id : " + widget.user.uid),
-        r( Icon(Icons.important_devices, color : Colors.green),"Company Id : " + widget.user.uid),
+        r( Icon(Icons.important_devices, color : Colors.green),"Company Id : " + widget.user.id),
         Row(
           children: [
             r( Icon(Icons.money, color : Colors.orange),"Pan Card : " + widget.user.pan),
             myuser()?IconButton(icon:Icon(Icons.edit,size: 23,color: Colors.green,),onPressed:(){
               Navigator.push(
                   context, PageTransition(
-                  child: Update(Name: 'Pan Card', doc: widget.user.uid, Firebasevalue: 'pan', Collection: 'Company', ), type: PageTransitionType.rightToLeft, duration: Duration(milliseconds: 200)
+                  child: Update(Name: 'Pan Card', doc: widget.user.id, Firebasevalue: 'pan', Collection: 'Company', ), type: PageTransitionType.rightToLeft, duration: Duration(milliseconds: 200)
               ));
             }):SizedBox(),
           ],
@@ -393,7 +394,7 @@ class _ProOState extends State<ProO> {
             myuser()?IconButton(icon:Icon(Icons.edit,size: 23,color: Colors.green,),onPressed:(){
               Navigator.push(
                   context, PageTransition(
-                  child: Update(Name: 'Tan Card', doc: widget.user.uid, Firebasevalue: 'tan', Collection: 'Company', ), type: PageTransitionType.rightToLeft, duration: Duration(milliseconds: 200)
+                  child: Update(Name: 'Tan Card', doc: widget.user.id, Firebasevalue: 'tan', Collection: 'Company', ), type: PageTransitionType.rightToLeft, duration: Duration(milliseconds: 200)
               ));
             }):SizedBox(),
           ],
@@ -709,6 +710,7 @@ class _ProOState extends State<ProO> {
     );
 
   }
+
   void confirm(UserModel user1,bool b){
     showModalBottomSheet<void>(
       context: context,
@@ -770,7 +772,8 @@ class _ProOState extends State<ProO> {
                     fontSize: 21,
                     buttonType: SocialLoginButtonType.generalLogin,
                     onPressed: () async {
-                      if(user1.source.isEmpty){
+                      try {
+                        if (user1.source.isEmpty) {
                           await FirebaseFirestore.instance.collection("Users")
                               .doc(user1.uid)
                               .update({
@@ -782,39 +785,34 @@ class _ProOState extends State<ProO> {
                               .update({
                             "people": FieldValue.arrayUnion([user1.uid]),
                           });
-                        Navigator.pop(context);
-                        ScaffoldMessenger.of(context).showSnackBar(
-                          SnackBar(
-                            content: Text('Added'),
-                          ),
-                        );
-                      }else if(!b){
-                        await FirebaseFirestore.instance.collection("Company")
-                            .doc(widget.user.uid)
-                            .update({
-                          "admin": FieldValue.arrayUnion([user1.uid]),
-                          "people": FieldValue.arrayUnion([user1.uid]),
-                        });
-                        await FirebaseFirestore.instance.collection("Users")
-                            .doc(user1.uid)
-                            .update({
-                          "type": 'Organisation',
-                          "source": widget.user.uid,
-                          "admin": FieldValue.arrayUnion([widget.user.uid]),
-                        });
-                        Navigator.pop(context);
-                        ScaffoldMessenger.of(context).showSnackBar(
-                          SnackBar(
-                            content: Text('Added'),
-                          ),
-                        );
-                      }else{
-                        Navigator.pop(context);
-                        ScaffoldMessenger.of(context).showSnackBar(
-                          SnackBar(
-                            content: Text('The Employee is already added to a Company ! Please remove it first'),
-                          ),
-                        );
+                          Navigator.pop(context);
+                          Send.message(context, "Success Added", true);
+                        } else if (!b) {
+                          await FirebaseFirestore.instance.collection("Company")
+                              .doc(widget.user.uid)
+                              .update({
+                            "admin": FieldValue.arrayUnion([user1.uid]),
+                            "people": FieldValue.arrayUnion([user1.uid]),
+                          });
+                          await FirebaseFirestore.instance.collection("Users")
+                              .doc(user1.uid)
+                              .update({
+                            "type": 'Organisation',
+                            "source": widget.user.uid,
+                            "admin": FieldValue.arrayUnion([widget.user.uid]),
+                          });
+                          Navigator.pop(context);
+                          Send.message(context, "Success Added", true);
+                        } else {
+                          Navigator.pop(context);
+                          Send.message(context,
+                              "The Employee is already added to a Company ! Please remove it first",
+                              false);
+                        }
+                      }catch(e){
+                        Send.message(context,
+                            "$e",
+                            false);
                       }
                     },
                   ),

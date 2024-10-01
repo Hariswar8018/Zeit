@@ -12,6 +12,13 @@ import '../provider/declare.dart';
 class Feeds extends StatelessWidget {
    Feeds({super.key});
    List<Feed> _list = [];
+   bool ishr(UserModel user){
+     if(user.type=="Individual"){
+       return false;
+     }else{
+       return true;
+     }
+   }
   @override
   Widget build(BuildContext context) {
     UserModel? _user = Provider.of<UserProvider>(context).getUser;
@@ -30,7 +37,7 @@ class Feeds extends StatelessWidget {
           ),
         ),
       ),
-      floatingActionButton:InkWell(
+      floatingActionButton:ishr(_user!)?InkWell(
         onTap: (){
           Navigator.push(
               context,
@@ -56,7 +63,7 @@ class Feeds extends StatelessWidget {
             ),
           ),
         ),
-      ),
+      ):SizedBox(),
       body: StreamBuilder(
         stream: FirebaseFirestore.instance
             .collection('Company')

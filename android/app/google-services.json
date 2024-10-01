@@ -12,7 +12,20 @@
           "package_name": "com.heavenonthisearth.zeit"
         }
       },
-      "oauth_client": [],
+      "oauth_client": [
+        {
+          "client_id": "1056015985966-06ql9o7v1gltcunmnnu5mo9bpp4k9h9h.apps.googleusercontent.com",
+          "client_type": 1,
+          "android_info": {
+            "package_name": "com.heavenonthisearth.zeit",
+            "certificate_hash": "a3226326da87596c5419e875cf5ad898dfdb3899"
+          }
+        },
+        {
+          "client_id": "1056015985966-rggpkhv72sm9d5kkbls3d1edkd6uffmb.apps.googleusercontent.com",
+          "client_type": 3
+        }
+      ],
       "api_key": [
         {
           "current_key": "AIzaSyAqba9hAxCoraCvcAiioytL8CdedGdax28"
@@ -20,7 +33,19 @@
       ],
       "services": {
         "appinvite_service": {
-          "other_platform_oauth_client": []
+          "other_platform_oauth_client": [
+            {
+              "client_id": "1056015985966-rggpkhv72sm9d5kkbls3d1edkd6uffmb.apps.googleusercontent.com",
+              "client_type": 3
+            },
+            {
+              "client_id": "1056015985966-9mrkg3vhtjj00riq6nljaq8qsipo027f.apps.googleusercontent.com",
+              "client_type": 2,
+              "ios_info": {
+                "bundle_id": "com.heavenonthisearth.zeit"
+              }
+            }
+          ]
         }
       }
     }

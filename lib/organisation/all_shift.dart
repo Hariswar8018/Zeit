@@ -202,7 +202,7 @@ class ChatU extends StatelessWidget {
               backgroundImage: NetworkImage(user.pic),
             ),
             title: Text(user.Name,style:TextStyle(fontWeight: FontWeight.w700,fontSize: 20)),
-            subtitle: Text(user.bio),
+            subtitle: Text(user.education),
           ),
           Row(
             children: [

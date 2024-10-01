@@ -2,70 +2,45 @@ import 'package:cloud_firestore/cloud_firestore.dart';
 import 'package:flutter/material.dart';
 import 'package:page_transition/page_transition.dart';
 import 'package:provider/provider.dart';
-import 'package:zeit/add/sendhr.dart';
+import 'package:zeit/add/add_request.dart';
 import 'package:zeit/cards/request_C.dart';
 import 'package:zeit/main_pages/empty.dart';
 import 'package:zeit/model/usermodel.dart';
+import 'package:zeit/services/hr_letters.dart';
 
-import '../add/add_request.dart';
 import '../model/approval.dart';
 import '../provider/declare.dart';
 
-class Approval extends StatefulWidget {
-  Approval({super.key});
+class Complaints extends StatefulWidget {
+  Complaints({super.key});
 
   @override
-  State<Approval> createState() => _ApprovalsState();
+  State<Complaints> createState() => _ComplaintsState();
 }
 
-class _ApprovalsState extends State<Approval> {
+class _ComplaintsState extends State<Complaints> {
   int active = 0;
   List<Request> _list = [];
-  bool ishr(UserModel user){
-    if(user.type=="Individual"){
-      return false;
-    }else{
-      return true;
-    }
-  }
-
   @override
   Widget build(BuildContext context) {
     UserModel? _user = Provider.of<UserProvider>(context).getUser;
-    return Scaffold(
-      appBar: AppBar(
-        automaticallyImplyLeading: true,
-        title: Text("My Cases"),
-      ),
-        floatingActionButton: ishr(_user!)?InkWell(
-          onTap: (){
-            Navigator.push(
-                context,
-                PageTransition(
-                    child: Hrchats(user: _user,),
-                    type: PageTransitionType.rightToLeft,
-                    duration: Duration(milliseconds: 600)));
-          },
-          child: Container(
-            width: 140, height : 45,
-            decoration: BoxDecoration(
-              borderRadius: BorderRadius.circular(20), color: Colors.blue,
-            ),
+    return _user!.source.isNotEmpty?Scaffold(
+        appBar: AppBar(
+          automaticallyImplyLeading: true,
+          title: Text("Organisation Complaints",style:TextStyle(color:Colors.white,fontSize: 23)),
+          backgroundColor: Color(0xff1491C7),
+          leading: InkWell(
+            onTap:()=>Navigator.pop(context),
             child: Padding(
-              padding: const EdgeInsets.all(8.0),
-              child: Center(
-                child: Row(
-                  mainAxisAlignment: MainAxisAlignment.center,
-                  crossAxisAlignment: CrossAxisAlignment.center,
-                  children: [
-                    Icon(Icons.warning,color :Colors.white),
-                    Text(" Send HR Letter", style : TextStyle(color : Colors.white)),
-                  ],
-                ),
+              padding: const EdgeInsets.all(6.0),
+              child: CircleAvatar(
+                backgroundColor: Colors.white,
+                child: Center(child: Icon(Icons.arrow_back_rounded,color:Color(0xff1491C7),size: 22,)),
               ),
             ),
           ),
-        ):InkWell(
+        ),
+        floatingActionButton:InkWell(
           onTap: (){
             Navigator.push(
                 context,
@@ -128,8 +103,8 @@ class _ApprovalsState extends State<Approval> {
             ),
             Expanded(child: StreamBuilder(
               stream: FirebaseFirestore.instance
-                  .collection('Company').doc(_user!.source).collection("Requests").where("status", isEqualTo: ga(active))
-                  .snapshots() ,
+                  .collection('Company').doc(_user!.source).collection("Complaints").where("status", isEqualTo: ga(active))
+                  .snapshots(),
               builder: (context, snapshot) {
                 if (snapshot.connectionState == ConnectionState.waiting) {
                   return Center(child: CircularProgressIndicator());
@@ -145,11 +120,11 @@ class _ApprovalsState extends State<Approval> {
                       mainAxisAlignment: MainAxisAlignment.center,
                       children: [
                         Text(
-                          "No Request Found",
+                          "No Complaints Found",
                           style: TextStyle(fontSize: 22, fontWeight: FontWeight.w600),
                         ),
                         Text(
-                          "Looks like you haven't any ${ga(active)} Requests ",
+                          "Organisation don't have any ${ga(active)} Complaints ",
                           style: TextStyle(fontSize: 14, fontWeight: FontWeight.w500),
                         ),
                         SizedBox(height: 10),
@@ -172,7 +147,7 @@ class _ApprovalsState extends State<Approval> {
             ),)
           ],
         )
-    );
+    ):Empty();
   }
   Widget ayu(int i ){
     return Text(ga(i), style: TextStyle(fontSize: active  == i ?18 : 16, fontWeight: FontWeight.w600,color :active ==i? Colors.black:Colors.grey.shade500),);

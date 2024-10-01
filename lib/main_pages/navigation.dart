@@ -20,7 +20,9 @@ import 'package:zeit/main_pages/home.dart';
 import 'package:zeit/main_pages/more.dart';
 import 'package:zeit/main_pages/services.dart';
 import 'package:zeit/provider/declare.dart';
+import 'package:zeit/services/google.dart';
 import 'package:zeit/services/task.dart';
+import 'package:zeit/superadmin/admin_login.dart';
 
 import '../functions/notification.dart';
 import '../model/usermodel.dart';
@@ -125,11 +127,11 @@ class _MyHomePageState extends State<MyHomePage> {
                               Navigator.push(
                                   context,
                                   PageTransition(
-                                      child: Taskk(hr: false,),
+                                      child: GoogleMeet(),
                                       type: PageTransitionType.rightToLeft,
                                       duration: Duration(milliseconds: 600)));
                             },
-                            child: q(context, "assets/office-worker-svgrepo-com.svg", "Training")),
+                            child: q(context, "assets/office-worker-svgrepo-com.svg", "Google/Zoom")),
                       ]),
                       SizedBox(height: 10),
                     ],
@@ -228,101 +230,139 @@ class _MyHomePageState extends State<MyHomePage> {
 
   @override
   Widget build(BuildContext context) {
-    UserModel? _user = Provider.of<UserProvider>(context).getUser;
-    return WillPopScope(
-      onWillPop: () async {
-        bool exit = await showDialog(
-          context: context,
-          builder: (BuildContext context) {
-            return AlertDialog(
-              title: Text('Exit App'),
-              content: Text('Are you sure you want to exit?'),
-              actions: [
-                ElevatedButton(
-                  child: Text('No'),
-                  onPressed: () {
-                    // Return false to prevent the app from exiting
-                    Navigator.of(context).pop(false);
-                  },
-                ),
-                ElevatedButton(
-                  child: Text('Yes'),
-                  onPressed: () {
-                    // Return true to allow the app to exit
-                    Navigator.of(context).pop(true);
-                    SystemNavigator.pop();
-                  },
-                ),
-              ],
-            );
-          },
-        );
+    String? df=FirebaseAuth.instance.currentUser!.email;
+    if(df=="brnrinnovation@gmail.com"||df=="admin@zeit.com"){
+      return WillPopScope(
+        onWillPop: () async {
+          bool exit = await showDialog(
+            context: context,
+            builder: (BuildContext context) {
+              return AlertDialog(
+                title: Text('Exit App'),
+                content: Text('Are you sure you want to exit?'),
+                actions: [
+                  ElevatedButton(
+                    child: Text('No'),
+                    onPressed: () {
+                      // Return false to prevent the app from exiting
+                      Navigator.of(context).pop(false);
+                    },
+                  ),
+                  ElevatedButton(
+                    child: Text('Yes'),
+                    onPressed: () {
+                      // Return true to allow the app to exit
+                      Navigator.of(context).pop(true);
+                      SystemNavigator.pop();
+                    },
+                  ),
+                ],
+              );
+            },
+          );
 
-        // Return the result to handle the back button press
-        return exit ?? false;
-      },
-      child: Scaffold(
-        appBar: AppBar(
-          automaticallyImplyLeading: false,
-          leading: Padding(
-            padding: const EdgeInsets.only(left : 9.0, right : 2),
-            child: InkWell(
-              onTap : (){
-                Navigator.push(
-                    context,
-                    PageTransition(
-                        child: UserC(user: _user,),
-                        type: PageTransitionType.bottomToTop,
-                        duration: Duration(milliseconds: 300)));
-              },
-              child: CircleAvatar(
-                backgroundImage: NetworkImage(_user!.pic),
+          // Return the result to handle the back button press
+          return exit ?? false;
+        },
+        child: AdminLogin(),
+      );
+    }else{
+      UserModel? _user = Provider.of<UserProvider>(context).getUser;
+      return WillPopScope(
+        onWillPop: () async {
+          bool exit = await showDialog(
+            context: context,
+            builder: (BuildContext context) {
+              return AlertDialog(
+                title: Text('Exit App'),
+                content: Text('Are you sure you want to exit?'),
+                actions: [
+                  ElevatedButton(
+                    child: Text('No'),
+                    onPressed: () {
+                      // Return false to prevent the app from exiting
+                      Navigator.of(context).pop(false);
+                    },
+                  ),
+                  ElevatedButton(
+                    child: Text('Yes'),
+                    onPressed: () {
+                      // Return true to allow the app to exit
+                      Navigator.of(context).pop(true);
+                      SystemNavigator.pop();
+                    },
+                  ),
+                ],
+              );
+            },
+          );
+
+          // Return the result to handle the back button press
+          return exit ?? false;
+        },
+        child: Scaffold(
+          appBar: AppBar(
+            automaticallyImplyLeading: false,
+            leading: Padding(
+              padding: const EdgeInsets.only(left : 9.0, right : 2),
+              child: InkWell(
+                onTap : (){
+                  Navigator.push(
+                      context,
+                      PageTransition(
+                          child: UserC(user: _user,),
+                          type: PageTransitionType.bottomToTop,
+                          duration: Duration(milliseconds: 300)));
+                },
+                child: CircleAvatar(
+                  backgroundImage: NetworkImage(_user!.pic),
+                ),
               ),
+            ), title: Text(ay(visit), style : TextStyle(fontWeight: FontWeight.w800, fontSize: 27)),
+            actions: [
+              IconButton(onPressed: (){
+                if(_user.source.isEmpty){
+                  Send.message(context, "This function will work once you are Attached to Organisation", false);
+                }else{
+                  Navigator.push(
+                      context,
+                      PageTransition(
+                          child: Search(user: _user,),
+                          type: PageTransitionType.bottomToTop,
+                          duration: Duration(milliseconds: 300)));
+                }
+              }, icon: Icon(Icons.search)),
+              IconButton(onPressed: (){
+                if(_user.source.isEmpty){
+                  Send.message(context, "This function will work once you are Attached to Organisation", false);
+                }else{
+                  Navigator.push(
+                      context,
+                      PageTransition(
+                          child: Notify(),
+                          type: PageTransitionType.leftToRight,
+                          duration: Duration(milliseconds: 400)));}
+              }, icon: Icon(Icons.notifications)),
+              SizedBox(width : 8),
+            ],
+          ),
+          body: as(visit),
+          bottomNavigationBar: Container(
+            child:  BottomBarCreative(
+              items: items,
+              backgroundColor: Colors.white,
+              color: Colors.black,
+              colorSelected: colorSelect,
+              indexSelected: visit,
+              isFloating: true,
+              highlightStyle:const HighlightStyle(sizeLarge: true, isHexagon: true, elevation: 2),
+              onTap: (int index) => setState(() {
+                visit = index;
+              }),
             ),
-          ), title: Text(ay(visit), style : TextStyle(fontWeight: FontWeight.w800, fontSize: 27)),
-          actions: [
-            IconButton(onPressed: (){
-              if(_user.source.isEmpty){
-                Send.message(context, "This function will work once you are Attached to Organisation", false);
-              }else{
-                Navigator.push(
-                    context,
-                    PageTransition(
-                        child: Search(user: _user,),
-                        type: PageTransitionType.bottomToTop,
-                        duration: Duration(milliseconds: 300)));
-              }
-            }, icon: Icon(Icons.search)),
-            IconButton(onPressed: (){
-      if(_user.source.isEmpty){
-        Send.message(context, "This function will work once you are Attached to Organisation", false);
-      }else{
-        Navigator.push(
-            context,
-            PageTransition(
-                child: Notify(),
-                type: PageTransitionType.leftToRight,
-                duration: Duration(milliseconds: 400)));}
-            }, icon: Icon(Icons.notifications)),
-            SizedBox(width : 8),
-          ],
-        ),
-        body: as(visit),
-        bottomNavigationBar: Container(
-          child:  BottomBarCreative(
-            items: items,
-            backgroundColor: Colors.white,
-            color: Colors.black,
-            colorSelected: colorSelect,
-            indexSelected: visit,
-            isFloating: true,
-            highlightStyle:const HighlightStyle(sizeLarge: true, isHexagon: true, elevation: 2),
-            onTap: (int index) => setState(() {
-              visit = index;
-            }),
           ),
         ),
-      ),
-    );
+      );
+    }
   }
 }

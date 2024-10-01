@@ -30,6 +30,7 @@ class NotifyAll{
      print(e);
    }
   }
+
   static Future<void> sendNotificationsCompany(String name, String desc,List tokens) async {
     var server = FirebaseCloudMessagingServer(
       serviceAccountFileContent,
@@ -65,6 +66,40 @@ class NotifyAll{
     }
 
   }
+
+ static Future<void> sendNotification(String name, String desc,String tokens) async {
+   var server = FirebaseCloudMessagingServer(
+     serviceAccountFileContent,
+   );
+     try{
+       var result = await server.send(
+         FirebaseSend(
+           validateOnly: false,
+           message: FirebaseMessage(
+             notification: FirebaseNotification(
+               title: name,
+               body: desc,
+             ),
+             android: FirebaseAndroidConfig(
+               ttl: '3s', // Optional TTL for notification
+               /// Add Delay in String. If you want to add 1 minute delay then add it like "60s"
+               notification: FirebaseAndroidNotification(
+                 icon: 'ic_notification', // Optional icon
+                 color: '#009999', // Optional color
+               ),
+             ),
+             token: tokens, // Send notification to specific user's token
+           ),
+         ),
+       );
+
+       // Print request response
+       print(result.toString());
+     }catch(e){
+       print(e);
+     }
+
+ }
 
  static  sendc(String name, String desc) async {
    // Fetch tokens from Firestore where 'arrayField' contains '1257'

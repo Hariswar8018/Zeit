@@ -37,6 +37,12 @@ class UserModel {
     required this.link3,
     required this.shit,
     required this.salary,
+    required this.meetlink,
+    required this.meetname,
+    required this.meetid,
+    required this.meetby,
+    required this.meetpic,
+    required this.meetdesc,
   });
 
   late final String lastlogin;
@@ -78,6 +84,14 @@ class UserModel {
   late final String token;
   late final double salary;
 
+  // New meeting fields
+  late final String meetlink;
+  late final String meetname;
+  late final String meetid;
+  late final String meetby;
+  late final String meetpic;
+  late final String meetdesc;
+
   UserModel.fromJson(Map<String, dynamic> json) {
     follower = List<dynamic>.from(json['jobfollower'] ?? []);
     token = json['token'] ?? "j";
@@ -117,6 +131,14 @@ class UserModel {
     link3 = json['link3'] ?? '';
     shit = json['shit'] ?? '';
     salary = (json['salary'] ?? 0.0).toDouble();
+
+    // New meeting fields initialization
+    meetlink = json['meetlink'] ?? '';
+    meetname = json['meetname'] ?? '';
+    meetid = json['meetid'] ?? '';
+    meetby = json['meetby'] ?? '';
+    meetpic = json['meetpic'] ?? '';
+    meetdesc = json['meetdesc'] ?? '';
   }
 
   Map<String, dynamic> toJson() {
@@ -156,6 +178,14 @@ class UserModel {
     data['link3'] = link3;
     data['shit'] = shit;
     data['salary'] = salary;
+
+    // Adding new meeting fields to JSON
+    data['meetlink'] = meetlink;
+    data['meetname'] = meetname;
+    data['meetid'] = meetid;
+    data['meetby'] = meetby;
+    data['meetpic'] = meetpic;
+    data['meetdesc'] = meetdesc;
     return data;
   }
 

@@ -1,11 +1,16 @@
 import 'package:flutter/material.dart';
 import 'package:flutter_to_pdf/flutter_to_pdf.dart';
 import 'package:social_login_buttons/social_login_buttons.dart';
+import 'package:zeit/functions/flush.dart';
 import 'package:zeit/model/organisation.dart';
 import 'package:zeit/model/pay.dart';
 import 'dart:typed_data';
 import 'package:image/image.dart' as img;
-
+import 'dart:typed_data';
+import 'dart:ui' as ui;
+import 'package:flutter/material.dart';
+import 'package:image_gallery_saver_plus/image_gallery_saver_plus.dart';
+import 'package:permission_handler/permission_handler.dart';
 import 'dart:async';
 import 'dart:ui';
 import 'package:flutter/services.dart';
@@ -87,14 +92,14 @@ class Pdf_Statement extends StatelessWidget {
                       children: [
                         Text(o.name, style: TextStyle(color: Colors.white,
                             fontWeight: FontWeight.w900,
-                            fontSize: w / 27)),
-                        Text(o.address, style: TextStyle(color: Colors.white,
+                            fontSize: w / 26)),
+                        Text(o.desc, style: TextStyle(color: Colors.white,
                             fontWeight: FontWeight.w600,
-                            fontSize: w / 31)),
+                            fontSize: w / 34)),
                         Text("Phone no. : " + o.phone,
                             style: TextStyle(color: Colors.white,
-                                fontWeight: FontWeight.w800,
-                                fontSize: w / 32)),
+                                fontWeight: FontWeight.w600,
+                                fontSize: w / 34)),
                       ],
                     )
                   ],
@@ -113,8 +118,8 @@ class Pdf_Statement extends StatelessWidget {
                   wordSpacing: 2,
                   letterSpacing: 5)),
               s(), s(),
-              r(w, "Name", u.name, "Date", u.id),
-              r(w, "Status", u.status, "Time", u.position),
+              r(w, "Name", u.name, "Date", fo(u.id)),
+              r(w, "Status", u.status, "Designation", u.position),
               s(),
               Container(
                 color: Color(0xff00CE9D),
@@ -228,6 +233,17 @@ class Pdf_Statement extends StatelessWidget {
       ],
     );
   }
+  String fo(String ii){
+    try {
+      int n = int.parse(ii);
+      DateTime da = DateTime.fromMicrosecondsSinceEpoch(n);
+      String h = DateFormat('dd/MM/yy \'on\' HH:mm').format(da);
+      return h;
+    }catch(e){
+      return "Unknown";
+    }
+  }
+
   final ExportDelegate exportDelegate = ExportDelegate();
   Future<String?> saveFile( document, String name) async {
     try {
@@ -358,8 +374,8 @@ class I_Statement extends StatelessWidget {
               s(),
               Text("PAYROLL STATEMENT",style:TextStyle(fontWeight:FontWeight.w800,fontSize: w/22,wordSpacing: 2,letterSpacing: 5)),
               s(),s(),
-              r(w,"Name",u.name,"Date", u.id),
-              r(w,"Status",u.status,"Time",u.position),
+              r(w,"Name",u.name,"Date", fo(u.id)),
+              r(w,"Status",u.status,"Designation",u.position),
               s(),
               Container(
                 color:Color(0xff00CE9D),
@@ -434,12 +450,45 @@ class I_Statement extends StatelessWidget {
             fontSize: 21,
             buttonType: SocialLoginButtonType.generalLogin,
             onPressed: () async {
+              try {
+                var status = await Permission.storage.request();
+                if (!status.isGranted) {
+                  Send.message(context, "Permission denied", false);
+                  print("Permission denied");
+                  return;
+                }
+
+                RenderRepaintBoundary boundary = boundaryKey.currentContext?.findRenderObject() as RenderRepaintBoundary;
+                ui.Image image = await boundary.toImage(pixelRatio: 3.0); // Adjust pixel ratio for higher quality
+                ByteData? byteData = await image.toByteData(format: ui.ImageByteFormat.png);
+                Uint8List pngBytes = byteData!.buffer.asUint8List();
+
+                // Save the image to the gallery using image_gallery_saver_plus
+                final result = await ImageGallerySaverPlus.saveImage(pngBytes, quality: 100, name: "payroll_statement");
+                print(result); // Check if saving is successful
+                Send.message(context, "$result", true);
+              } catch (e) {
+                Send.message(context, "$e", false);
+                print("Error capturing and saving image: $e");
+              }
             },
           ),
         ),
       ],
     );
   }
+
+  String fo(String ii){
+    try {
+      int n = int.parse(ii);
+      DateTime da = DateTime.fromMicrosecondsSinceEpoch(n);
+      String h = DateFormat('dd/MM/yy \'on\' HH:mm').format(da);
+      return h;
+    }catch(e){
+      return "Unknown";
+    }
+  }
+
   Widget r(double w,String s,String s2, String s3, String s4){
     return  Row(
       children: [

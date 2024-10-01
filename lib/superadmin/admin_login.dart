@@ -1,9 +1,13 @@
+import 'package:firebase_auth/firebase_auth.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter/services.dart';
 import 'package:flutter_svg/flutter_svg.dart';
 import 'package:page_transition/page_transition.dart';
 import 'package:provider/provider.dart';
+import 'package:zeit/functions/flush.dart';
+import 'package:zeit/main.dart';
 import 'package:zeit/model/usermodel.dart';
+import 'package:zeit/organisation/all_users.dart';
 import 'package:zeit/superadmin/view_company.dart';
 
 import '../provider/declare.dart';
@@ -13,7 +17,6 @@ class AdminLogin extends StatelessWidget {
 
   @override
   Widget build(BuildContext context) {
-    UserModel? _user = Provider.of<UserProvider>(context).getUser;
     return WillPopScope(
       onWillPop: () async {
         // Show the alert dialog and wait for a result
@@ -50,17 +53,41 @@ class AdminLogin extends StatelessWidget {
       child: Scaffold(
         appBar: AppBar(
           automaticallyImplyLeading: false,
-          leading: Padding(
-            padding: const EdgeInsets.only(left : 9.0, right : 2),
-            child: InkWell(
-              onTap : (){
-
-              },
-              child: CircleAvatar(
-                backgroundImage: NetworkImage(_user!.pic),
-              ),
-            ),
-          ), title: Text("Admin Control", style : TextStyle(fontWeight: FontWeight.w800, fontSize: 27)),
+           title: Text("Admin Control", style : TextStyle(fontWeight: FontWeight.w800, fontSize: 27)),
+          actions: [
+            IconButton(onPressed: () async {
+              await showDialog(
+                context: context,
+                builder: (BuildContext context) {
+                  return AlertDialog(
+                    title: Text('Logout? '),
+                    content: Text('You Sure to LOGOUT from the App'),
+                    actions: [
+                      ElevatedButton(
+                        child: Text('No'),
+                        onPressed: () {
+                          Navigator.pop(context);
+                        },
+                      ),
+                      ElevatedButton(
+                        child: Text('Yes'),
+                        onPressed: () async {
+                          await FirebaseAuth.instance.signOut();
+                          Navigator.push(
+                              context,
+                              PageTransition(
+                                  child: Splash(),
+                                  type: PageTransitionType.bottomToTop,
+                                  duration: Duration(milliseconds: 300)));
+                          Send.message(context, "Log Out Success", true);
+                        },
+                      ),
+                    ],
+                  );
+                },
+              );
+            }, icon: Icon(Icons.login, color : Colors.red,size: 35,)),
+          ],
         ),
         body:Column(
           children: [
@@ -85,6 +112,29 @@ class AdminLogin extends StatelessWidget {
                             duration: Duration(milliseconds: 300)));
                   },
                   child: q(context, "assets/factory-company-svgrepo-com.svg", "View Company")),
+            ]),
+            SizedBox(height: 20,),
+            Row(mainAxisAlignment: MainAxisAlignment.spaceEvenly, children: [
+              InkWell(
+                  onTap: (){
+                    Navigator.push(
+                        context,
+                        PageTransition(
+                            child: ViewUseries(view: false,),
+                            type: PageTransitionType.bottomToTop,
+                            duration: Duration(milliseconds: 300)));
+                  },
+                  child: q(context, "assets/identity-and-access-management-svgrepo-com.svg", "Users Account")),
+              InkWell(
+                  onTap: (){
+                    Navigator.push(
+                        context,
+                        PageTransition(
+                            child: ViewUseries(view: true,),
+                            type: PageTransitionType.bottomToTop,
+                            duration: Duration(milliseconds: 300)));
+                  },
+                  child: q(context, "assets/identitycardmajor-svgrepo-com.svg", "View By Position")),
             ]),
           ],
         )

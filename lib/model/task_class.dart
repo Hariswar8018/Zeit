@@ -28,7 +28,10 @@ class Task {
     required this.Ignored,
     required this.Incompleted,
     required this.Pending,
-
+    required this.hr,
+    required this.nameol,
+    required this.namepicol,
+    required this.etol,
   });
 
   late final String name;
@@ -59,11 +62,17 @@ class Task {
   late final List Ignored;
   late final List Incompleted;
 
+  // New Fields
+  late final bool hr;
+  late final String nameol;
+  late final String namepicol;
+  late final String etol;
+
   Task.fromJson(Map<String, dynamic> json) {
-    Pending =json['Pending']??[];
-    Completed=json['Completed']??[];
-    Ignored=json['Ignored']??[];
-    Incompleted=json['Incompleted']??[];
+    Pending = json['Pending'] ?? [];
+    Completed = json['Completed'] ?? [];
+    Ignored = json['Ignored'] ?? [];
+    Incompleted = json['Incompleted'] ?? [];
     name = json['name'] ?? '';
     id = json['id'] ?? '';
     hrid = json['hrid'] ?? '';
@@ -86,14 +95,20 @@ class Task {
     invited = json['invited'] ?? 0;
     complete = json['complete'] ?? 0;
     progress = json['progress'] ?? 0;
+
+    // New Fields
+    hr = json['hr'] ?? true;
+    nameol = json['nameol'] ?? '';
+    namepicol = json['namepicol'] ?? '';
+    etol = json['etol'] ?? '';
   }
 
   Map<String, dynamic> toJson() {
     final data = <String, dynamic>{};
-    data['Pending']=Pending;
-    data['Completed']=Completed;
-    data['Ignored']=Ignored;
-    data['Incompleted']=Incompleted;
+    data['Pending'] = Pending;
+    data['Completed'] = Completed;
+    data['Ignored'] = Ignored;
+    data['Incompleted'] = Incompleted;
     data['name'] = name;
     data['id'] = id;
     data['hrid'] = hrid;
@@ -116,6 +131,13 @@ class Task {
     data['invited'] = invited;
     data['complete'] = complete;
     data['progress'] = progress;
+
+    // New Fields
+    data['hr'] = hr;
+    data['nameol'] = nameol;
+    data['namepicol'] = namepicol;
+    data['etol'] = etol;
+
     return data;
   }
 

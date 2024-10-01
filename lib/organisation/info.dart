@@ -125,12 +125,11 @@ class _Step1State extends State<Step2> {
                 hr: [], subadmin: [],
                 phone: phone.text, email: email.text,
                 address: address.text, incor: uid.text, bday: _singleDatePickerValueWithDefaultValue[0].toString(), pic1: '',
-                people: [hk], desc: '', labourlink: '', comcases: '', compolicy: '', lawname: '', lawphone: '', lawemail: '', status: 'Waiting for Approval', 
+                people: [hk], desc: '', labourlink: '', comcases: '', compolicy: '', lawname: '', lawphone: '', lawemail: '', status: 'Approved',
                 c1: 0.0, c2: 0.0, c3: 0.0, c4: 0.0, c6: 0.0, c5: 0.0,
                 c7: 0.0, c8: 0.0, c9: 0.0, c10: 0.0, c11: 0.0, c12: 0.0, budget: 0.0, lat: 22.9, long: 23.97,
             );
             await FirebaseFirestore.instance.collection("Users").doc(hk).update({
-              "type" : 'Organisation',
               "source":hk,
             });
             await usersCollection.doc(hk).set(h.toJson());

@@ -4,9 +4,13 @@ import 'package:cloud_firestore/cloud_firestore.dart';
 import 'package:firebase_auth/firebase_auth.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter/services.dart';
+import 'package:url_launcher/url_launcher.dart';
 import 'package:zeit/add/training.dart';
 import 'package:zeit/cards/training.dart';
+import 'package:zeit/fee_performance/performance_user.dart';
+import 'package:zeit/functions/flush.dart';
 import 'package:zeit/functions/google_map_check-in_out.dart';
+import 'package:zeit/main_pages/empty.dart';
 import 'package:zeit/main_pages/testapp.dart';
 import 'package:zeit/model/training.dart';
 import 'package:flutter_svg/flutter_svg.dart';
@@ -24,7 +28,10 @@ import 'package:zeit/model/usermodel.dart';
 import 'package:zeit/organisation/kpi.dart';
 import 'package:zeit/provider/declare.dart';
 import 'package:slide_countdown/slide_countdown.dart';
+import 'package:zeit/services/chats.dart';
+import 'package:zeit/services/files_see.dart';
 import 'package:zeit/services/job.dart';
+import 'package:zeit/services/sticky.dart';
 import 'package:zeit/services/task.dart';
 
 import '../add/add_hospital.dart';
@@ -143,6 +150,7 @@ class _HomeState extends State<Home> {
   }
 
   int trainingp=0;
+
   void counttrain() async {
     UserModel? _user = Provider.of<UserProvider>(context,listen: false).getUser;
     int count = 0; int i=0;
@@ -366,18 +374,134 @@ class _HomeState extends State<Home> {
     double d = MediaQuery.of(context).size.width - 30;
     double h = MediaQuery.of(context).size.width - 20 ;
     UserModel? _user = Provider.of<UserProvider>(context).getUser;
-    return _user!.type!= "Organisation" ? (
-    _user.source.isNotEmpty? Scaffold(
-      body : SingleChildScrollView(
+    if(_user!.source.isEmpty){
+      if(_user!.type=="Individual"){
+        return emplty(d, _user!);
+      }else{
+        return Empty2();
+      }
+    }else{
+      if(_user!.type=="Individual"){
+        return employee(d, _user);
+      }else{
+        return organisation(d, _user!);
+      }
+
+    }
+  }
+
+
+  Widget organisation(double d,UserModel _user){
+    return  Scaffold(
+      body: SingleChildScrollView(
         child: Column(
-            crossAxisAlignment: CrossAxisAlignment.center,
-            mainAxisAlignment: MainAxisAlignment.center,
-            children : [
-               Padding(
-                  padding: const EdgeInsets.all(15.0),
+          crossAxisAlignment: CrossAxisAlignment.center,
+          mainAxisAlignment:MainAxisAlignment.center,
+          children: [
+            w(),
+            Row(
+              mainAxisAlignment: MainAxisAlignment.spaceEvenly,
+              children: [
+                InkWell(
+                    onTap: () async {
+                    },
+                    child: c(d," Total Employee"," $people1 / $people ", Icon(Icons.person,size:d/22,color:Colors.white,),0)),
+                c(d," Active Task"," $taskk1 / $taskk ", Icon(Icons.task,size:d/22,color:Colors.white,),1),
+              ],
+            ),
+            SizedBox(height:9),
+            Row(
+              mainAxisAlignment: MainAxisAlignment.spaceEvenly,
+              children: [
+                c(d," Training",trainingp.toString(), Icon(Icons.pan_tool_rounded,size:d/22,color:Colors.white),2),
+                c(d," Health Benefits","$healthcount", Icon(Icons.health_and_safety,size:d/22,color:Colors.white),3),
+              ],
+            ),
+            SizedBox(height:5),
+            TextButton(onPressed: () async {
+
+              String  uid = FirebaseAuth.instance.currentUser!.uid ;
+              try {
+                // Reference to the 'users' collection
+                CollectionReference usersCollection = FirebaseFirestore.instance.collection('Company');
+                // Query the collection based on uid
+                QuerySnapshot querySnapshot = await usersCollection.where('people', arrayContains: uid).get();
+                // Check if a document with the given uid exists
+                if (querySnapshot.docs.isNotEmpty) {
+                  // Convert the document snapshot to a UserModel
+                  OrganisationModel user = OrganisationModel.fromSnap(querySnapshot.docs.first);
+                  Navigator.push(
+                      context,
+                      PageTransition(
+                          child: Kpi(user: user,),
+                          type: PageTransitionType.rightToLeft,
+                          duration: Duration(milliseconds: 600)));
+                } else {
+                  // No document found with the given uid
+                  return null;
+                }
+              } catch (e) {
+                print("Error fetching user by uid: $e");
+                return null;
+              }
+
+            }, child: Text("View All KPIs >",style:TextStyle(fontSize: d/25,fontWeight: FontWeight.w500,color:Colors.blue)),),
+            SizedBox(height:5),
+            Center(
+              child: InkWell(
+                onTap:(){
+                  Navigator.push(
+                      context,
+                      PageTransition(
+                          child: UserC(user: _user,),
+                          type: PageTransitionType.rightToLeft,
+                          duration: Duration(milliseconds: 600)));
+                },
+                child: Padding(
+                  padding: const EdgeInsets.all(8.0),
                   child: Container(
+                      width: d,
+                      decoration: BoxDecoration(
+                        color: Colors.white,
+                        borderRadius: BorderRadius.circular(20),
+                      ),
+                      child: Padding(
+                        padding: const EdgeInsets.all(12.0),
+                        child: Column(
+                          mainAxisAlignment: MainAxisAlignment.center,
+                          crossAxisAlignment: CrossAxisAlignment.center,
+                          children: [
+                            a( "assets/office-chair-svgrepo-com.svg","My Profile", true,2),
+                            ListTile(
+                              leading: CircleAvatar(
+                                backgroundImage: NetworkImage(_user!.pic),
+                                radius: 25,
+                              ),
+                              title: Text(_user.Name,style :TextStyle(fontWeight: FontWeight.w800,fontSize: 19)),
+                              subtitle: Text(_user.education,style :TextStyle(fontWeight: FontWeight.w600,fontSize: 12)),
+                              trailing: Text(_user.type,style :TextStyle(fontWeight: FontWeight.w400,)),
+                            ),
+                          ],
+                        ),
+                      )),
+                ),
+              ),
+            ),
+            w(),
+            // Recruitment
+            InkWell(
+              onTap:(){
+                Navigator.push(
+                    context,
+                    PageTransition(
+                        child: Jobh(hr: true,),
+                        type: PageTransitionType.rightToLeft,
+                        duration: Duration(milliseconds: 600)));
+              },
+              child: Padding(
+                padding: const EdgeInsets.all(8.0),
+                child: Container(
                     width: d,
-                    height: 250,
                     decoration: BoxDecoration(
                       color: Colors.white,
                       borderRadius: BorderRadius.circular(20),
@@ -388,29 +512,232 @@ class _HomeState extends State<Home> {
                         mainAxisAlignment: MainAxisAlignment.center,
                         crossAxisAlignment: CrossAxisAlignment.center,
                         children: [
-                          w(),
-                          SlideCountdownSeparated(
-                            padding: defaultPadding,
-                            separatorType: SeparatorType.symbol,
-                            infinityCountUp: true,
-                            duration: const Duration(days: 2), // This is irrelevant for count up
-                            showZeroValue: true,
-                            streamDuration: _streamDuration,
-                            countUp: true,
-                          ),
-                          w(),
-                          Text("Shift : "+_user.shit,style: TextStyle(fontSize: 18),),
-                          Text("9 Am to 7 Pm"),
-                          w(),
-                          w(),
-                          InkWell(
-                            onTap: () async {
+                          a( "assets/office-worker-svgrepo-com.svg", "Recruitment", true,7),
+                          jobs(200),
+                        ],
+                      ),
+                    )),
+              ),
+            ),
+            w(),
+            //Tasks
+            InkWell(
+              onTap: (){
+                Navigator.push(
+                    context,
+                    PageTransition(
+                        child: Taskk(hr: false,),
+                        type: PageTransitionType.rightToLeft,
+                        duration: Duration(milliseconds: 600)));
+              },
+              child: Padding(
+                padding: const EdgeInsets.all(8.0),
+                child: Container(
+                    width: d,
+                    decoration: BoxDecoration(
+                      color: Colors.white,
+                      borderRadius: BorderRadius.circular(20),
+                    ),
+                    child: Padding(
+                      padding: const EdgeInsets.all(12.0),
+                      child: Column(
+                        mainAxisAlignment: MainAxisAlignment.center,
+                        crossAxisAlignment: CrossAxisAlignment.center,
+                        children: [
+                          a( "assets/office-school-ecommerce-svgrepo-com.svg","My Tasks", true,3),
+                          task(),
+                        ],
+                      ),
+                    )),
+              ),
+            ),
+            w(),
+
+            //Health
+            Padding(
+              padding: const EdgeInsets.all(8.0),
+              child: Container(
+                  width: d,
+                  decoration: BoxDecoration(
+                    color: Colors.white,
+                    borderRadius: BorderRadius.circular(20),
+                  ),
+                  child: Padding(
+                    padding: const EdgeInsets.all(12.0),
+                    child: Column(
+                      mainAxisAlignment: MainAxisAlignment.center,
+                      crossAxisAlignment: CrossAxisAlignment.center,
+                      children: [
+                        a( "assets/hospital-chart-style-s-svgrepo-com.svg","Health Services", true,5),
+                        hospital(),
+                      ],
+                    ),
+                  )),
+            ),
+            w(),
+            // Events
+            Padding(
+              padding: const EdgeInsets.all(8.0),
+              child: Container(
+                  width: d,
+                  decoration: BoxDecoration(
+                    color: Colors.white,
+                    borderRadius: BorderRadius.circular(20),
+                  ),
+                  child: Padding(
+                    padding: const EdgeInsets.all(12.0),
+                    child: Column(
+                      mainAxisAlignment: MainAxisAlignment.center,
+                      crossAxisAlignment: CrossAxisAlignment.center,
+                      children: [
+                        a( "assets/event-calender-date-note-svgrepo-com (1).svg","Training", true,4),
+                        training(),
+                      ],
+                    ),
+                  )),
+            ),
+            w(),
+          ],
+        ),
+      ),
+    );
+  }
+
+  Widget individual(){
+    return Column(
+      children: [
+        Text("mbbnm"),
+      ],
+    );
+  }
+
+ Widget yuup(){
+   DateTime now = DateTime.now();
+   int currentHour = now.hour;
+
+   if (currentHour >= 13 && currentHour < 15) {
+     // Show your widget here
+     return Text("LUNCH BREAK",style: TextStyle(color: Colors.brown,fontWeight: FontWeight.w800),);
+   } else {
+     // Return empty container or nothing
+     return Text("Shedule 9 AM to 8 PM",style: TextStyle(color: Colors.black,fontWeight: FontWeight.w800),);
+   }
+ }
+
+  bool isWithinOneHour(String st) {
+    try {
+      int currentTimeMillis = DateTime
+          .now()
+          .millisecondsSinceEpoch;
+      int savedTimeMillis = int.parse(st);
+      // Calculate the difference in time
+      int differenceInMillis = currentTimeMillis - savedTimeMillis;
+
+      // Check if the difference is less than 1 hour (3600000 milliseconds)
+      return differenceInMillis < 3600000;
+    }catch(e){
+      return false;
+    }
+  }
+
+  Widget employee(double d,UserModel _user){
+    return Scaffold(
+      body : SingleChildScrollView(
+        child: Column(
+            crossAxisAlignment: CrossAxisAlignment.center,
+            mainAxisAlignment: MainAxisAlignment.center,
+            children : [
+              isWithinOneHour(_user.meetid)? Padding(
+                padding: const EdgeInsets.all(15.0),
+                child: Container(
+                  width: d,
+                  height: 160,
+                  decoration: BoxDecoration(
+                    color: Colors.red.shade600,
+                    borderRadius: BorderRadius.circular(20),
+                  ),
+                  child: Padding(
+                    padding: const EdgeInsets.all(12.0),
+                    child: Column(
+                      mainAxisAlignment: MainAxisAlignment.center,
+                      crossAxisAlignment: CrossAxisAlignment.center,
+                      children: [
+                        Icon(Icons.ondemand_video_sharp,color: Colors.white,size: 30,),
+                        Text("Invitation !",style: TextStyle(color: Colors.white,fontSize: 17),),
+                        Text(_user.meetby+" (${_user.meetdesc}) invited you to Google/Zoom meet",style: TextStyle(color: Colors.white),),
+                        SizedBox(height: 15,),
+                        InkWell(
+                          onTap: () async {
+                            final Uri _url = Uri.parse(_user.meetlink);
+                            try{
+                              await launchUrl(_url,mode:LaunchMode.externalApplication,);
+                            }catch(e){
+                              final Uri _urrl = Uri.parse("https://"+_user.meetlink);
                               try{
-                                adddate();
+                                await launchUrl(_urrl,mode:LaunchMode.externalApplication,);
                               }catch(e){
-                                print(e);
+                                Send.message(context, "$e", false);
                               }
-                              try{
+                            }
+                          },
+                          child: Container(
+                            height: 45,
+                            width: 120,
+                            decoration: BoxDecoration(
+                              borderRadius: BorderRadius.circular(15),
+                              color: Colors.white,
+                            ),
+                            child: Center(
+                              child: Text(
+                                "Join Now",
+                                style: TextStyle(color: Colors.blue, fontSize: 18),
+                              ),
+                            ),
+                          ),
+                        )
+                      ],
+                    ),
+                  ),
+                ),
+              ):SizedBox(),
+              Padding(
+                padding: const EdgeInsets.all(15.0),
+                child: Container(
+                  width: d,
+                  height: 250,
+                  decoration: BoxDecoration(
+                    color: Colors.white,
+                    borderRadius: BorderRadius.circular(20),
+                  ),
+                  child: Padding(
+                    padding: const EdgeInsets.all(12.0),
+                    child: Column(
+                      mainAxisAlignment: MainAxisAlignment.center,
+                      crossAxisAlignment: CrossAxisAlignment.center,
+                      children: [
+                        w(),
+                        SlideCountdownSeparated(
+                          padding: defaultPadding,
+                          separatorType: SeparatorType.symbol,
+                          infinityCountUp: true,
+                          duration: const Duration(days: 2), // This is irrelevant for count up
+                          showZeroValue: true,
+                          streamDuration: _streamDuration,
+                          countUp: true,
+                        ),
+                        w(),
+                        Text("Shift : "+_user.shit,style: TextStyle(fontSize: 18),),
+                        yuup(),
+                        w(),
+                        w(),
+                        InkWell(
+                          onTap: () async {
+                            try{
+                              adddate();
+                            }catch(e){
+                              print(e);
+                            }
+                            try{
                               final result = await Navigator.push(
                                 context,
                                 PageTransition(
@@ -546,29 +873,165 @@ class _HomeState extends State<Home> {
                                   }
                                 }
                               }}catch(e){
-                                print(e);
-                              }
-                            },
-                            child: Container(
-                              height: 45,
-                              width: 120,
-                              decoration: BoxDecoration(
-                                borderRadius: BorderRadius.circular(15),
-                                color: Colors.indigoAccent.shade400,
-                              ),
-                              child: Center(
-                                child: Text(
-                                  ont ? "Check Out" : "Check In",
-                                  style: TextStyle(color: Colors.white, fontSize: 18),
-                                ),
+                              print(e);
+                            }
+                          },
+                          child: Container(
+                            height: 45,
+                            width: 120,
+                            decoration: BoxDecoration(
+                              borderRadius: BorderRadius.circular(15),
+                              color: Colors.indigoAccent.shade400,
+                            ),
+                            child: Center(
+                              child: Text(
+                                ont ? "Check Out" : "Check In",
+                                style: TextStyle(color: Colors.white, fontSize: 18),
                               ),
                             ),
                           ),
-                        ],
-                      ),
+                        ),
+                      ],
                     ),
                   ),
                 ),
+              ),
+              Row(
+                mainAxisAlignment: MainAxisAlignment.spaceEvenly,
+                children: [
+                  InkWell(
+                    onTap: (){
+                      Navigator.push(
+                          context,
+                          PageTransition(
+                              child: Sticky(str: _user.uid,),
+                              type: PageTransitionType.rightToLeft,
+                              duration: Duration(milliseconds: 60)));
+                    },
+                    child: Container(
+                      height: 45,
+                      width: 170,
+                      decoration: BoxDecoration(
+                        borderRadius: BorderRadius.circular(15),
+                        color: Colors.purpleAccent.shade400,
+                      ),
+                      child: Center(
+                        child: Row(
+                          mainAxisAlignment: MainAxisAlignment.center,
+                          crossAxisAlignment: CrossAxisAlignment.center,
+                          children: [
+                            Icon(Icons.notes,color: Colors.white,),
+                            Text(
+                              " Sticky Notes",
+                              style: TextStyle(color: Colors.white, fontSize: 18),
+                            ),
+                          ],
+                        ),
+                      ),
+                    ),
+                  ),
+                  InkWell(
+                    onTap: (){
+                      Navigator.push(
+                          context,
+                          PageTransition(
+                              child: Chats(user: _user),
+                              type: PageTransitionType.rightToLeft,
+                              duration: Duration(milliseconds: 60)));
+                    },
+                    child: Container(
+                      height: 45,
+                      width: 170,
+                      decoration: BoxDecoration(
+                        borderRadius: BorderRadius.circular(15),
+                        color: Colors.redAccent.shade400,
+                      ),
+                      child: Center(
+                        child: Row(
+                          mainAxisAlignment: MainAxisAlignment.center,
+                          crossAxisAlignment: CrossAxisAlignment.center,
+                          children: [
+                            Icon(Icons.message,color: Colors.white,),
+                            Text(
+                              " Chats",
+                              style: TextStyle(color: Colors.white, fontSize: 18),
+                            ),
+                          ],
+                        ),
+                      ),
+                    ),
+                  ),
+                ],
+              ),
+              SizedBox(height: 9,),
+              Row(
+                mainAxisAlignment: MainAxisAlignment.spaceEvenly,
+                children: [
+                  InkWell(
+                    onTap: (){
+                      Navigator.push(
+                          context,
+                          PageTransition(
+                              child: File_See(str: _user.uid,),
+                              type: PageTransitionType.rightToLeft,
+                              duration: Duration(milliseconds: 60)));
+                    },
+                    child: Container(
+                      height: 45,
+                      width: 170,
+                      decoration: BoxDecoration(
+                        borderRadius: BorderRadius.circular(15),
+                        color: Colors.blueAccent.shade400,
+                      ),
+                      child: Center(
+                        child: Row(
+                          mainAxisAlignment: MainAxisAlignment.center,
+                          crossAxisAlignment: CrossAxisAlignment.center,
+                          children: [
+                            Icon(Icons.file_copy,color: Colors.white,),
+                            Text(
+                              " Files",
+                              style: TextStyle(color: Colors.white, fontSize: 18),
+                            ),
+                          ],
+                        ),
+                      ),
+                    ),
+                  ),
+                  InkWell(
+                    onTap: (){
+                      Navigator.push(
+                          context,
+                          PageTransition(
+                              child: PerformanceU(user: _user!,),
+                              type: PageTransitionType.rightToLeft,
+                              duration: Duration(milliseconds: 80)));
+                    },
+                    child: Container(
+                      height: 45,
+                      width: 170,
+                      decoration: BoxDecoration(
+                        borderRadius: BorderRadius.circular(15),
+                        color: Colors.orange.shade400,
+                      ),
+                      child: Center(
+                        child: Row(
+                          mainAxisAlignment: MainAxisAlignment.center,
+                          crossAxisAlignment: CrossAxisAlignment.center,
+                          children: [
+                            Icon(Icons.adb_outlined,color: Colors.white,),
+                            Text(
+                              "Performance",
+                              style: TextStyle(color: Colors.white, fontSize: 18),
+                            ),
+                          ],
+                        ),
+                      ),
+                    ),
+                  ),
+                ],
+              ),
+              w(),
               InkWell(
                 onTap:(){
                   Navigator.push(
@@ -646,7 +1109,7 @@ class _HomeState extends State<Home> {
                   Navigator.push(
                       context,
                       PageTransition(
-                          child: Taskk(hr: false,),
+                          child: Taskk(hr:true,),
                           type: PageTransitionType.rightToLeft,
                           duration: Duration(milliseconds: 600)));
                 },
@@ -664,7 +1127,7 @@ class _HomeState extends State<Home> {
                           mainAxisAlignment: MainAxisAlignment.center,
                           crossAxisAlignment: CrossAxisAlignment.center,
                           children: [
-                            a( "assets/office-school-ecommerce-svgrepo-com.svg","My Tasks", false,0),
+                            a( "assets/office-school-ecommerce-svgrepo-com.svg","My Tasks", true,3),
                             task(),
                           ],
                         ),
@@ -675,12 +1138,7 @@ class _HomeState extends State<Home> {
               // Events
               InkWell(
                 onTap : (){
-                  Navigator.push(
-                      context,
-                      PageTransition(
-                          child: AddTask(),
-                          type: PageTransitionType.rightToLeft,
-                          duration: Duration(milliseconds: 600)));
+
                 },
                 child: Padding(
                   padding: const EdgeInsets.all(8.0),
@@ -704,7 +1162,6 @@ class _HomeState extends State<Home> {
                 ),
               ),
               w(),
-              //Health
               Padding(
                 padding: const EdgeInsets.all(8.0),
                 child: Container(
@@ -729,11 +1186,14 @@ class _HomeState extends State<Home> {
             ]
         ),
       ),
-    ):
-    Scaffold(
+    );
+  }
+
+  Widget emplty(double d,UserModel _user){
+    return  Scaffold(
       body : SingleChildScrollView(
         child: Column(
-          crossAxisAlignment: CrossAxisAlignment.center,
+            crossAxisAlignment: CrossAxisAlignment.center,
             mainAxisAlignment: MainAxisAlignment.center,
             children : [
               InkWell(
@@ -811,215 +1271,14 @@ class _HomeState extends State<Home> {
             ]
         ),
       ),
-    )):
-    Scaffold(
-      body: SingleChildScrollView(
-        child: Column(
-          crossAxisAlignment: CrossAxisAlignment.center,
-          mainAxisAlignment:MainAxisAlignment.center,
-          children: [
-            w(),
-           Row(
-             mainAxisAlignment: MainAxisAlignment.spaceEvenly,
-             children: [
-               InkWell(
-                   onTap: () async {
-                   },
-                   child: c(d," Total Employee"," $people1 / $people ", Icon(Icons.person,size:d/22,color:Colors.white,),0)),
-               c(d," Active Task"," $taskk1 / $taskk ", Icon(Icons.task,size:d/22,color:Colors.white,),1),
-             ],
-           ),
-            SizedBox(height:9),
-            Row(
-              mainAxisAlignment: MainAxisAlignment.spaceEvenly,
-              children: [
-                c(d," Training",trainingp.toString(), Icon(Icons.pan_tool_rounded,size:d/22,color:Colors.white),2),
-                c(d," Health Benefits","$healthcount", Icon(Icons.health_and_safety,size:d/22,color:Colors.white),3),
-              ],
-            ),
-            SizedBox(height:5),
-            TextButton(onPressed: () async {
+    );
+  }
 
-              String  uid = FirebaseAuth.instance.currentUser!.uid ;
-              try {
-                // Reference to the 'users' collection
-                CollectionReference usersCollection = FirebaseFirestore.instance.collection('Company');
-                // Query the collection based on uid
-                QuerySnapshot querySnapshot = await usersCollection.where('people', arrayContains: uid).get();
-                // Check if a document with the given uid exists
-                if (querySnapshot.docs.isNotEmpty) {
-                  // Convert the document snapshot to a UserModel
-                  OrganisationModel user = OrganisationModel.fromSnap(querySnapshot.docs.first);
-                  Navigator.push(
-                      context,
-                      PageTransition(
-                          child: Kpi(user: user,),
-                          type: PageTransitionType.rightToLeft,
-                          duration: Duration(milliseconds: 600)));
-                } else {
-                  // No document found with the given uid
-                  return null;
-                }
-              } catch (e) {
-                print("Error fetching user by uid: $e");
-                return null;
-              }
-
-            }, child: Text("View All KPIs >",style:TextStyle(fontSize: d/25,fontWeight: FontWeight.w500,color:Colors.blue)),),
-            SizedBox(height:5),
-            Center(
-              child: InkWell(
-                onTap:(){
-                  Navigator.push(
-                      context,
-                      PageTransition(
-                          child: UserC(user: _user,),
-                          type: PageTransitionType.rightToLeft,
-                          duration: Duration(milliseconds: 600)));
-                },
-                child: Padding(
-                  padding: const EdgeInsets.all(8.0),
-                  child: Container(
-                      width: d,
-                      decoration: BoxDecoration(
-                        color: Colors.white,
-                        borderRadius: BorderRadius.circular(20),
-                      ),
-                      child: Padding(
-                        padding: const EdgeInsets.all(12.0),
-                        child: Column(
-                          mainAxisAlignment: MainAxisAlignment.center,
-                          crossAxisAlignment: CrossAxisAlignment.center,
-                          children: [
-                            a( "assets/office-chair-svgrepo-com.svg","My Profile", true,2),
-                            ListTile(
-                              leading: CircleAvatar(
-                                backgroundImage: NetworkImage(_user!.pic),
-                                radius: 25,
-                              ),
-                              title: Text(_user.Name,style :TextStyle(fontWeight: FontWeight.w800,fontSize: 19)),
-                              subtitle: Text(_user.education,style :TextStyle(fontWeight: FontWeight.w600,fontSize: 12)),
-                              trailing: Text(_user.type,style :TextStyle(fontWeight: FontWeight.w400,)),
-                            ),
-                          ],
-                        ),
-                      )),
-                ),
-              ),
-            ),
-            w(),
-            // Recruitment
-            InkWell(
-              onTap:(){
-                Navigator.push(
-                    context,
-                    PageTransition(
-                        child: Jobh(hr: true,),
-                        type: PageTransitionType.rightToLeft,
-                        duration: Duration(milliseconds: 600)));
-              },
-              child: Padding(
-                padding: const EdgeInsets.all(8.0),
-                child: Container(
-                    width: d,
-                    decoration: BoxDecoration(
-                      color: Colors.white,
-                      borderRadius: BorderRadius.circular(20),
-                    ),
-                    child: Padding(
-                      padding: const EdgeInsets.all(12.0),
-                      child: Column(
-                        mainAxisAlignment: MainAxisAlignment.center,
-                        crossAxisAlignment: CrossAxisAlignment.center,
-                        children: [
-                          a( "assets/office-worker-svgrepo-com.svg", "Recruitment", true,7),
-                         jobs(200),
-                        ],
-                      ),
-                    )),
-              ),
-            ),
-            w(),
-            //Tasks
-            InkWell(
-              onTap: (){
-                Navigator.push(
-                    context,
-                    PageTransition(
-                        child: Taskk(hr: false,),
-                        type: PageTransitionType.rightToLeft,
-                        duration: Duration(milliseconds: 600)));
-              },
-              child: Padding(
-                padding: const EdgeInsets.all(8.0),
-                child: Container(
-                    width: d,
-                    decoration: BoxDecoration(
-                      color: Colors.white,
-                      borderRadius: BorderRadius.circular(20),
-                    ),
-                    child: Padding(
-                      padding: const EdgeInsets.all(12.0),
-                      child: Column(
-                        mainAxisAlignment: MainAxisAlignment.center,
-                        crossAxisAlignment: CrossAxisAlignment.center,
-                        children: [
-                          a( "assets/office-school-ecommerce-svgrepo-com.svg","My Tasks", true,3),
-                          task(),
-                        ],
-                      ),
-                    )),
-              ),
-            ),
-            w(),
-
-            //Health
-            Padding(
-              padding: const EdgeInsets.all(8.0),
-              child: Container(
-                  width: d,
-                  decoration: BoxDecoration(
-                    color: Colors.white,
-                    borderRadius: BorderRadius.circular(20),
-                  ),
-                  child: Padding(
-                    padding: const EdgeInsets.all(12.0),
-                    child: Column(
-                      mainAxisAlignment: MainAxisAlignment.center,
-                      crossAxisAlignment: CrossAxisAlignment.center,
-                      children: [
-                        a( "assets/hospital-chart-style-s-svgrepo-com.svg","Health Services", true,5),
-                        hospital(),
-                      ],
-                    ),
-                  )),
-            ),
-            w(),
-            // Events
-            Padding(
-              padding: const EdgeInsets.all(8.0),
-              child: Container(
-                  width: d,
-                  decoration: BoxDecoration(
-                    color: Colors.white,
-                    borderRadius: BorderRadius.circular(20),
-                  ),
-                  child: Padding(
-                    padding: const EdgeInsets.all(12.0),
-                    child: Column(
-                      mainAxisAlignment: MainAxisAlignment.center,
-                      crossAxisAlignment: CrossAxisAlignment.center,
-                      children: [
-                        a( "assets/event-calender-date-note-svgrepo-com (1).svg","Training", true,4),
-                        training(),
-                      ],
-                    ),
-                  )),
-            ),
-            w(),
-          ],
-        ),
-      ),
+  Widget admin(){
+    return Column(
+      children: [
+        Text("gvgh"),
+      ],
     );
   }
 
@@ -1041,10 +1300,42 @@ class _HomeState extends State<Home> {
     }else if(v == 2){
 
     }else if(v==3){
+      Task hj = Task(
+        name: "hgg",
+        id: "1",
+        hrid: "hr123",
+        hrname: "HR Name",
+        comid: "com456",
+        followers: [],  // List of followers, empty for now
+        benefit: [],    // List of benefits, empty for now
+        description: "Sample description",
+        startdate: "2024-09-23",
+        enddate: "2024-09-30",
+        priority: "High",
+        status: "Pending",
+        pic: "pic_url",
+        assigndate: "2024-09-22",
+        lat: 12.34,
+        lon: 56.78,
+        client_name: "Client Name",
+        client_id: "client123",
+        category: "Category",
+        invited: 10,
+        complete: 5,
+        progress: 50,
+        Pending: [],        // List of pending tasks
+        Completed: [],      // List of completed tasks
+        Ignored: [],        // List of ignored tasks
+        Incompleted: [],    // List of incompleted tasks
+        hr: true,           // Boolean value for hr
+        nameol: "nameol",
+        namepicol: "namepicol",
+        etol: "etol",
+      );
       Navigator.push(
           context,
           PageTransition(
-              child: AddTask(),
+              child: AddTask(hj: hj, on: false,),
               type: PageTransitionType.rightToLeft,
               duration: Duration(milliseconds: 600)));
     }else if( v == 4){
@@ -1126,6 +1417,7 @@ class _HomeState extends State<Home> {
           ) : SizedBox(width: 1)
         ]);
   }
+
   Widget attend(){
     List<TimeModel> _list = [];
     return Container(

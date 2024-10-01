@@ -10,34 +10,74 @@ import 'package:intl/intl.dart';
 
 import 'package:zeit/model/time.dart';
 import 'dart:async';
+import 'package:add_2_calendar/add_2_calendar.dart';
+import 'package:intl/intl.dart';
 
 class Attendance extends StatefulWidget {
-  bool time; String uid;
-   Attendance({super.key,required this.time,required this.uid});
+  final bool time;
+  final String uid;
+
+  Attendance({super.key, required this.time, required this.uid});
 
   @override
   State<Attendance> createState() => _AttendanceState();
 }
 
 class _AttendanceState extends State<Attendance> {
-  int pre = 0 , abs = 0 , nt = 0;
+  late List<Date> dates ; // Initialize dates here
+  int pre = 0, abs = 0, nt = 0;
+
+  @override
+  void initState() {
+    super.initState();
+    fetchDataFromFirestore().then((firestoreDates) {
+      setState(() {
+        dates = firestoreDates;
+      });
+    });
+    calculateDurationSumAndAverage(_singleDatePickerValueWithDefaultValue[0]!, _singleDatePickerValueWithDefaultValue[1]!);
+  }
 
   Future<List<Date>> fetchDataFromFirestore() async {
     List<Date> firestoreDates = [];
-    QuerySnapshot querySnapshot = await FirebaseFirestore.instance.collection("Users")
-        .doc(widget.uid)
-        .collection("Attendance")
-        .get();
-    querySnapshot.docs.forEach((doc) {
-      print(doc);
-      DateTime date = DateTime.fromMillisecondsSinceEpoch(int.parse(doc['millisecondstos']));
-      firestoreDates.add(Date(
-        date: date,
-        color: Color(doc['color']), // Use Color directly, no need to parse as int
-      ));
-    });
+
+    try {
+      QuerySnapshot querySnapshot = await FirebaseFirestore.instance
+          .collection("Users")
+          .doc(widget.uid)
+          .collection("Attendance")
+          .get();
+
+      for (var doc in querySnapshot.docs) {
+        // Cast doc.data() to Map<String, dynamic>
+        Map<String, dynamic> data = doc.data() as Map<String, dynamic>;
+        print(data); // Check the data being fetched
+
+        // Check for the necessary fields
+        if (data.containsKey('millisecondstos') && data.containsKey('color')) {
+          DateTime date = DateTime.fromMillisecondsSinceEpoch(int.parse(data['millisecondstos']));
+          firestoreDates.add(Date(
+            date: date,
+            color: Color(data['color']),
+          ));
+        } else {
+          print("Missing fields in document: ${doc.id}");
+        }
+      }
+
+      // Update the state with fetched data
+      setState(() {
+        dates = firestoreDates;
+      });
+
+    } catch (e) {
+      print("Error fetching attendance data: $e");
+    }
+
+    print(firestoreDates);
     return firestoreDates;
   }
+
 
   late Timer _timer;
 double averageDuration1=0.0;
@@ -173,18 +213,9 @@ int daysc = 0;
     _timer.cancel();
   }
 
-  late final List<Date> dates   ;
 
-  @override
-  void initState() {
-    super.initState();
-    fetchDataFromFirestore().then((firestoreDates) {
-      setState(() {
-        dates = firestoreDates;
-      });
-    });
-    calculateDurationSumAndAverage(_singleDatePickerValueWithDefaultValue[0]!, _singleDatePickerValueWithDefaultValue[1]!);
-  }
+
+
 
   String local = 'en';
   List<TimeModel> _list = [];
@@ -208,14 +239,14 @@ int daysc = 0;
       ),
       body: SafeArea(
         child: Padding(
-          padding: const EdgeInsets.only(top: 20),
+          padding: const EdgeInsets.only(top: 3),
           child: Column(
             children: [
               CustomCalendarViewer(
                 local: local,
                 dates: dates,
                 ranges: ranges ,
-                calendarType: CustomCalendarType.multiDatesAndRanges ,
+                calendarType: CustomCalendarType.range ,
                 calendarStyle: CustomCalendarStyle.normal ,
                 animateDirection: CustomCalendarAnimatedDirection.vertical ,
                 movingArrowSize: 29 ,
@@ -623,11 +654,40 @@ class AttenUser extends StatelessWidget {
   Widget build(BuildContext context) {
     return Padding(
       padding: const EdgeInsets.only(left:15.0,right:15,bottom:5),
-      child: InkWell(
+      child: user.startaddress=="HOLIDAY"?
+      InkWell(
         onTap: (){
 
+          // Step 1: Convert DateTime to formatted string
+          String formattedDate = '${user.date}-${user.month}-${user.year}';
+
+          // Step 2: Convert string back to DateTime
+          DateFormat dateFormat = DateFormat('dd-MM-yyyy');
+          DateTime parsedDate = dateFormat.parse(formattedDate);
+
+          // Step 3: Add 7 hours to the parsedDate for the endDate
+          DateTime endDate = parsedDate.add(Duration(hours: 7));
+
+          // Use parsedDate for startDate and endDate for the event
+          final Event event = Event(
+            title: 'Holiday for ${user.endaddress}',
+            description: 'Holiday declared by HR in account of ${user.endaddress}',
+            location: 'Company Location',
+            startDate: parsedDate, // Use parsedDate as startDate
+            endDate: endDate, // Use the calculated endDate (7 hours ahead)
+            iosParams: IOSParams(
+              reminder: Duration(hours: 1), // Set reminder duration here.
+              url: 'https://www.example.com', // Set URL for iOS.
+            ),
+            androidParams: AndroidParams(
+              emailInvites: [], // Set email invites for Android.
+            ),
+          );
+          Add2Calendar.addEvent2Cal(event);
+          print('Event Start Date: $parsedDate');
+          print('Event End Date: $endDate');
         },
-        child: user.color==4294961979?Container(
+        child: Container(
             width: MediaQuery.of(context).size.width-20,
             decoration: BoxDecoration(
                 color: Colors.white,
@@ -643,7 +703,7 @@ class AttenUser extends StatelessWidget {
                 mainAxisAlignment: MainAxisAlignment.center,
                 crossAxisAlignment: CrossAxisAlignment.start,
                 children: [
-                  Text("LEAVE",style:TextStyle(color:Colors.orangeAccent,fontWeight: FontWeight.w900,fontSize: 18)),
+                  Text("Holiday for ${user.endaddress}",style:TextStyle(color:Colors.orangeAccent,fontWeight: FontWeight.w900,fontSize: 18)),
                   Container(
                     width: MediaQuery.of(context).size.width-40,
                     child: Row(
@@ -659,42 +719,75 @@ class AttenUser extends StatelessWidget {
                   ),
                 ],
               ),
-            )):
-        Container(
-            width: MediaQuery.of(context).size.width-20,
-            decoration: BoxDecoration(
-                color: Colors.white,
-                borderRadius: BorderRadius.circular(8),
-                border: Border.all(
-                    color: Colors.grey,
-                    width: 0.3
-                )
-            ),
-            child: Padding(
-              padding: const EdgeInsets.all(9.0),
-              child: Column(
-                mainAxisAlignment: MainAxisAlignment.center,
-                crossAxisAlignment: CrossAxisAlignment.start,
-                children: [
-                  Text("PRESENT",style:TextStyle(color:Colors.green,fontWeight: FontWeight.w900,fontSize: 18)),
-                  Container(
-                    width: MediaQuery.of(context).size.width-40,
-                    child: Row(
-                      mainAxisAlignment: MainAxisAlignment.spaceBetween,
-                      children: [
-                        Container(
-                            child: Text(user.time, style: TextStyle(fontWeight: FontWeight.w400,fontSize: 18),)),
-                        Spacer(),
-                        Text( formatElapsedTime( user.duration),style:TextStyle(color:Colors.red,fontWeight: FontWeight.w600,fontSize: 14)),
-                        SizedBox(width:10),
-                      ],
-                    ),
-                  ),
-                ],
-              ),
             )),
-      ),
-    );
+      ):
+      (user.color==4294961979?Container(
+          width: MediaQuery.of(context).size.width-20,
+          decoration: BoxDecoration(
+              color: Colors.white,
+              borderRadius: BorderRadius.circular(8),
+              border: Border.all(
+                  color: Colors.grey,
+                  width: 0.3
+              )
+          ),
+          child: Padding(
+            padding: const EdgeInsets.all(9.0),
+            child: Column(
+              mainAxisAlignment: MainAxisAlignment.center,
+              crossAxisAlignment: CrossAxisAlignment.start,
+              children: [
+                Text("LEAVE",style:TextStyle(color:Colors.orangeAccent,fontWeight: FontWeight.w900,fontSize: 18)),
+                Container(
+                  width: MediaQuery.of(context).size.width-40,
+                  child: Row(
+                    mainAxisAlignment: MainAxisAlignment.spaceBetween,
+                    children: [
+                      Container(
+                          child: Text(user.time, style: TextStyle(fontWeight: FontWeight.w400,fontSize: 18),)),
+                      Spacer(),
+                      Text( "Enjoy  🥳😎👌🤗",style:TextStyle(color:Colors.blue,fontWeight: FontWeight.w600,fontSize: 14)),
+                      SizedBox(width:10),
+                    ],
+                  ),
+                ),
+              ],
+            ),
+          )):
+      Container(
+          width: MediaQuery.of(context).size.width-20,
+          decoration: BoxDecoration(
+              color: Colors.white,
+              borderRadius: BorderRadius.circular(8),
+              border: Border.all(
+                  color: Colors.grey,
+                  width: 0.3
+              )
+          ),
+          child: Padding(
+            padding: const EdgeInsets.all(9.0),
+            child: Column(
+              mainAxisAlignment: MainAxisAlignment.center,
+              crossAxisAlignment: CrossAxisAlignment.start,
+              children: [
+                Text("PRESENT",style:TextStyle(color:Colors.green,fontWeight: FontWeight.w900,fontSize: 18)),
+                Container(
+                  width: MediaQuery.of(context).size.width-40,
+                  child: Row(
+                    mainAxisAlignment: MainAxisAlignment.spaceBetween,
+                    children: [
+                      Container(
+                          child: Text(user.time, style: TextStyle(fontWeight: FontWeight.w400,fontSize: 18),)),
+                      Spacer(),
+                      Text( formatElapsedTime( user.duration),style:TextStyle(color:Colors.red,fontWeight: FontWeight.w600,fontSize: 14)),
+                      SizedBox(width:10),
+                    ],
+                  ),
+                ),
+              ],
+            ),
+          ))
+            ));
   }
   String formatElapsedTime(int elapsedTime) {
     int elapsedSeconds = elapsedTime.toInt();

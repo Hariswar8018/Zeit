@@ -3,11 +3,13 @@ import 'package:cloud_firestore/cloud_firestore.dart';
 import 'package:firebase_auth/firebase_auth.dart';
 import 'package:flutter/material.dart';
 import 'package:intl/intl.dart';
+import 'package:page_transition/page_transition.dart';
 import 'package:provider/provider.dart';
 import 'package:social_login_buttons/social_login_buttons.dart';
 import 'package:zeit/model/feeds.dart';
 import 'package:zeit/model/task_class.dart';
 
+import '../functions/give_back_user.dart';
 import '../model/approval.dart';
 import '../model/usermodel.dart';
 import '../provider/declare.dart';
@@ -74,26 +76,66 @@ class _AddTaskState extends State<AddR> {
             t("Your Last Login Date & Time"),
             SizedBox(height:9),
             aa(join),
-            t("Your Request"),
+            t(widget.str=="Complaints"?"Your Complaint":"Your Request"),
             SizedBox(height:9),
             a(request),
             SizedBox(height:9),
-            t("Request Reason ?"),
-            Row(
+            widget.str=="Complaints"?Column(
+              crossAxisAlignment: CrossAxisAlignment.start,
               children: [
-                rt("Visa"), rt("BroadBand Connection"),
+                t("Is this Complaint against Employee?"),
+                SizedBox(height:9),
+                InkWell(
+                  onTap: () async {
+                    UserModel s = await Navigator.push(
+                        context,
+                        PageTransition(
+                            child: BackUser1(user: _user!.source,),
+                            type: PageTransitionType.rightToLeft,
+                            duration: Duration(milliseconds: 100)));
+                    setState(() {
+                      name1=s.Name;
+                      name2=s.education;
+                      pic=s.pic;
+                      st="Complaint against "+name1+" (${name2})";
+                    });
+                  },
+                  child: !(name1=="")? ListTile(
+                    tileColor: Colors.orange.shade50,
+                    leading: CircleAvatar(backgroundImage: NetworkImage(pic),),
+                    title: Text(name1,style:TextStyle(color: Colors.blue,fontWeight: FontWeight.w700)),
+                    subtitle: Text(name2,style:TextStyle(color: Colors.blue)),
+                    trailing: Icon(Icons.warning,color:Colors.red),
+                ):ListTile(
+                    tileColor: Colors.red.shade50,
+                    leading: Icon(Icons.work,color: Colors.blue,),
+                    title: Text("Find Employee",style:TextStyle(color: Colors.blue,fontWeight: FontWeight.w700)),
+                    subtitle: Text("Find Employee to fill complaint for",style:TextStyle(color: Colors.blue)),
+                    trailing: Icon(Icons.arrow_forward_ios,color:Colors.blue),
+                  ),
+                ),
+              ],
+            ):Column(
+              children: [
+                t("Request Reason ?"),
+                Row(
+                  children: [
+                    rt("Visa"), rt("BroadBand Connection"),
+                  ],
+                ),
+                Row(
+                  children: [
+                    rt("Gas Connection"), rt("Bank Account Open"),
+                  ],
+                ),
+                Row(
+                  children: [
+                    rt("Govt. Related"), rt("Others"),
+                  ],
+                ),
               ],
             ),
-            Row(
-              children: [
-                rt("Gas Connection"), rt("Bank Account Open"),
-              ],
-            ),
-            Row(
-              children: [
-                rt("Govt. Related"), rt("Others"),
-              ],
-            ),
+
           ],
         ),
       ),
@@ -103,7 +145,7 @@ class _AddTaskState extends State<AddR> {
           child: SocialLoginButton(
               backgroundColor: Colors.blue,
               height: 40,
-              text: 'Add Event Now',
+              text: 'Add ${widget.str} Now',
               borderRadius: 20,
               fontSize: 21,
               buttonType: SocialLoginButtonType.generalLogin,
@@ -126,6 +168,7 @@ class _AddTaskState extends State<AddR> {
       ],
     );
   }
+  String pic="",name1="",name2="";
   String st = "Visa" ;
   Widget rt(String jh){
     return InkWell(

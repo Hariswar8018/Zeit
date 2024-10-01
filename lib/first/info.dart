@@ -16,7 +16,8 @@ import '../main_pages/navigation.dart';
 
 
 class Step1 extends StatefulWidget {
-  const Step1({super.key});
+  String strr;
+   Step1({super.key,required this.strr});
 
   @override
   State<Step1> createState() => _Step1State();
@@ -91,9 +92,6 @@ class _Step1State extends State<Step1> {
     }
   }
 
-
-
-  /// Returns the next button.
   Widget nextButton() {
     return InkWell(
       onTap: ()  async {
@@ -129,14 +127,16 @@ class _Step1State extends State<Step1> {
                 bio: bio.text,
                 reporting: "",
                 location: "",
-                role: "",
+                role: "${widget.strr}",
                 status: "",
-                type: "",
+                type: "${widget.strr}",
                 source: "",
                 joiningd: "",
                 exp: "",
                 totalexp: "",
-                identity: "", resumelink: '', resumetime: 9, link1: '', link2: '', link3: '', shit: '', salary: 0
+                identity: "", resumelink: '', resumetime: 9,
+                link1: '', link2: '', link3: '', shit: '', salary: 0,
+                meetlink: '', meetname: '', meetid: '', meetby: '', meetpic: '', meetdesc: ''
             );
             print("haan be");
             await usersCollection.doc(h).set(u.toJson());

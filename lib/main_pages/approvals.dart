@@ -1,6 +1,9 @@
 import 'package:cloud_firestore/cloud_firestore.dart';
 import 'package:flutter/material.dart';
+import 'package:page_transition/page_transition.dart';
 import 'package:provider/provider.dart';
+import 'package:zeit/add/add_request.dart';
+import 'package:zeit/add/sendhr.dart';
 import 'package:zeit/cards/request_C.dart';
 import 'package:zeit/main_pages/empty.dart';
 import 'package:zeit/model/usermodel.dart';
@@ -18,10 +21,77 @@ class Approvals extends StatefulWidget {
 class _ApprovalsState extends State<Approvals> {
   int active = 0;
   List<Request> _list = [];
+
+  bool ishr(UserModel user){
+    if(user.type=="Individual"){
+      return false;
+    }else{
+      return true;
+    }
+  }
+
+
   @override
   Widget build(BuildContext context) {
     UserModel? _user = Provider.of<UserProvider>(context).getUser;
     return _user!.source.isNotEmpty?Scaffold(
+        floatingActionButton: ishr(_user)?InkWell(
+          onTap: (){
+            Navigator.push(
+                context,
+                PageTransition(
+                    child: Hrchats(user: _user,),
+                    type: PageTransitionType.rightToLeft,
+                    duration: Duration(milliseconds: 600)));
+          },
+          child: Container(
+            width: 140, height : 45,
+            decoration: BoxDecoration(
+              borderRadius: BorderRadius.circular(20), color: Colors.blue,
+            ),
+            child: Padding(
+              padding: const EdgeInsets.all(8.0),
+              child: Center(
+                child: Row(
+                  mainAxisAlignment: MainAxisAlignment.center,
+                  crossAxisAlignment: CrossAxisAlignment.center,
+                  children: [
+                    Icon(Icons.warning,color :Colors.white),
+                    Text(" Send HR Letter", style : TextStyle(color : Colors.white)),
+                  ],
+                ),
+              ),
+            ),
+          ),
+        ):InkWell(
+          onTap: (){
+            Navigator.push(
+                context,
+                PageTransition(
+                    child: AddR(str: "Complaints",),
+                    type: PageTransitionType.rightToLeft,
+                    duration: Duration(milliseconds: 600)));
+          },
+          child: Container(
+            width: 140, height : 40,
+            decoration: BoxDecoration(
+              borderRadius: BorderRadius.circular(20), color: Colors.blue,
+            ),
+            child: Padding(
+              padding: const EdgeInsets.all(8.0),
+              child: Center(
+                child: Row(
+                  mainAxisAlignment: MainAxisAlignment.center,
+                  crossAxisAlignment: CrossAxisAlignment.center,
+                  children: [
+                    Icon(Icons.escalator_warning,color :Colors.white),
+                    Text("Add Complaint", style : TextStyle(color : Colors.white)),
+                  ],
+                ),
+              ),
+            ),
+          ),
+        ),
         body: Column(
           children: [
             Padding(
@@ -57,7 +127,7 @@ class _ApprovalsState extends State<Approvals> {
             Expanded(child: StreamBuilder(
               stream: FirebaseFirestore.instance
                   .collection('Company').doc(_user!.source).collection("Requests").where("status", isEqualTo: ga(active))
-                  .snapshots() ,
+                  .snapshots(),
               builder: (context, snapshot) {
                 if (snapshot.connectionState == ConnectionState.waiting) {
                   return Center(child: CircularProgressIndicator());

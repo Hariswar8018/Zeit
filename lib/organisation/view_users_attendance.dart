@@ -1,4 +1,5 @@
 import 'package:page_transition/page_transition.dart';
+import 'package:provider/provider.dart';
 import 'package:zeit/fee_performance/performance_user.dart';
 import 'package:zeit/model/organisation.dart';
 import 'package:zeit/model/usermodel.dart';
@@ -7,6 +8,8 @@ import 'package:flutter/material.dart';
 import 'package:zeit/model/usermodel.dart';
 import 'package:zeit/services/attendance.dart';
 
+import '../provider/declare.dart';
+
 
 class ViewUsersAttendance extends StatelessWidget {
   String id;bool b ; bool performance;OrganisationModel user;
@@ -14,6 +17,7 @@ class ViewUsersAttendance extends StatelessWidget {
   List<UserModel> _list = [];
   @override
   Widget build(BuildContext context) {
+    UserModel? _user = Provider.of<UserProvider>(context).getUser;
     return Scaffold(
       backgroundColor: Colors.white,
         appBar: AppBar(
@@ -32,7 +36,7 @@ class ViewUsersAttendance extends StatelessWidget {
         ),
       body:StreamBuilder(
         stream: FirebaseFirestore.instance
-            .collection('Users').where("source",isEqualTo:user.id )
+            .collection('Users').where("source",isEqualTo:_user!.source )
             .snapshots(),
         builder: (context, snapshot) {
           if (snapshot.connectionState == ConnectionState.waiting) {

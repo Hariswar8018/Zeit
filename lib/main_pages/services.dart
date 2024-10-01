@@ -15,6 +15,8 @@ import 'package:zeit/organisation/kpi.dart';
 import 'package:zeit/organisation/legal_compilance.dart';
 import 'package:zeit/organisation/travel.dart';
 import 'package:zeit/organisation/view_users_attendance.dart';
+import 'package:zeit/services/company_leave.dart';
+import 'package:zeit/services/complaints.dart';
 import 'package:zeit/services/job.dart';
 import 'package:zeit/services/my_payroll.dart';
 import 'package:zeit/services/task.dart';
@@ -25,6 +27,7 @@ import '../provider/declare.dart';
 import '../services/attendance.dart';
 import '../services/hr_letters.dart';
 import '../services/leave.dart';
+import '../services/view_complaints.dart';
 
 class Services extends StatefulWidget {
   const Services({super.key});
@@ -63,34 +66,74 @@ class _ServicesState extends State<Services> {
   @override
   Widget build(BuildContext context) {
     UserModel? _user = Provider.of<UserProvider>(context).getUser;
-    return _user!.source.isNotEmpty?(_user.type=="Organisation"?
-    Scaffold(
+    if(_user!.source.isEmpty){
+      if(_user!.type=="Individual"){
+        return Empty();
+      }else{
+        return Empty2();
+      }
+    }else{
+      if(_user!.type=="Individual"){
+        return indiv(_user);
+      }else if(_user!.type=="HR"){
+        return organisation( _user!);
+      }else{
+        return admin( _user!);
+      }
+    }
+  }
+  Widget admin(UserModel _user){
+    return  Scaffold(
         body: SingleChildScrollView(
           child: Column(
               children: [
                 w(),
                 Row(mainAxisAlignment: MainAxisAlignment.spaceEvenly, children: [
-          InkWell(
-              onTap:(){
-                print("rrukuli");
-                  Navigator.push(
-                    context,
-                    PageTransition(
-                        child: Jobh(hr: true,),
-                        type: PageTransitionType.rightToLeft,
-                        duration: Duration(milliseconds: 600)));
-              },
-              child: q(context, "assets/calender-day-love-svgrepo-com.svg", "Job Applicant")),
-          InkWell(
-              onTap:(){
-                Navigator.push(
-                    context,
-                    PageTransition(
-                        child: ViewUsersAttendance(id: '', b: false, performance: false, user: organ,),
-                        type: PageTransitionType.rightToLeft,
-                        duration: Duration(milliseconds: 400)));
-              },
-              child: q(context, "assets/event-calender-date-note-svgrepo-com.svg", "Attendance")),
+                  InkWell(
+                      onTap:(){
+                        print("rrukuli");
+                        Navigator.push(
+                            context,
+                            PageTransition(
+                                child: Jobh(hr: true,),
+                                type: PageTransitionType.rightToLeft,
+                                duration: Duration(milliseconds: 600)));
+                      },
+                      child: q(context, "assets/calender-day-love-svgrepo-com.svg", "Job Applicant")),
+                  InkWell(
+                      onTap:(){
+                        Navigator.push(
+                            context,
+                            PageTransition(
+                                child: ViewUsersAttendance(id: '', b: false, performance: false, user: organ,),
+                                type: PageTransitionType.rightToLeft,
+                                duration: Duration(milliseconds: 400)));
+                      },
+                      child: q(context, "assets/event-calender-date-note-svgrepo-com.svg", "Attendance")),
+                ]),
+                w(),
+                Row(mainAxisAlignment: MainAxisAlignment.spaceEvenly, children: [
+                  InkWell(
+                      onTap:(){
+                        print("rrukuli");
+                        Navigator.push(
+                            context,
+                            PageTransition(
+                                child: Holidays(uid: _user.source),
+                                type: PageTransitionType.rightToLeft,
+                                duration: Duration(milliseconds: 600)));
+                      },
+                      child: q(context, "assets/complete-ok-accept-good-tick-svgrepo-com.svg", "Company Holiday")),
+                  InkWell(
+                      onTap:(){
+                        Navigator.push(
+                            context,
+                            PageTransition(
+                                child: Complaintss(),
+                                type: PageTransitionType.rightToLeft,
+                                duration: Duration(milliseconds: 400)));
+                      },
+                      child: q(context, "assets/identity-and-access-management-svgrepo-com.svg", "Complaints")),
                 ]),
                 w(),
                 Row(mainAxisAlignment: MainAxisAlignment.spaceEvenly, children: [
@@ -116,124 +159,299 @@ class _ServicesState extends State<Services> {
                       child: q(context, "assets/time-hourglass-svgrepo-com.svg", "Time Tracking")),
                 ]),
                 w(),
-            Row(mainAxisAlignment: MainAxisAlignment.spaceEvenly, children: [
-              InkWell(
-                  onTap:() async {
-                    Navigator.push(
-                        context,
-                        PageTransition(
-                            child: Expense(user: organ,),
-                            type: PageTransitionType.rightToLeft,
-                            duration: Duration(milliseconds: 600)));
-                  },
-                  child: q(context, "assets/event-calender-date-note-svgrepo-com (1).svg", "Expense")),
-              InkWell(
-                  onTap:(){
-                    Navigator.push(
-                        context,
-                        PageTransition(
-                            child: Payroll(user: organ,),
-                            type: PageTransitionType.rightToLeft,
-                            duration: Duration(milliseconds: 600)));
-                  },
-                  child: q(context, "assets/accounting-svgrepo-com.svg", "Payroll")),
-            ]),
+                Row(mainAxisAlignment: MainAxisAlignment.spaceEvenly, children: [
+                  InkWell(
+                      onTap:() async {
+                        Navigator.push(
+                            context,
+                            PageTransition(
+                                child: Expense(user: organ,),
+                                type: PageTransitionType.rightToLeft,
+                                duration: Duration(milliseconds: 600)));
+                      },
+                      child: q(context, "assets/event-calender-date-note-svgrepo-com (1).svg", "Expense")),
+                  InkWell(
+                      onTap:(){
+                        Navigator.push(
+                            context,
+                            PageTransition(
+                                child: Payroll(user: organ,),
+                                type: PageTransitionType.rightToLeft,
+                                duration: Duration(milliseconds: 600)));
+                      },
+                      child: q(context, "assets/accounting-svgrepo-com.svg", "Payroll")),
+                ]),
                 w(),
-            Row(mainAxisAlignment: MainAxisAlignment.spaceEvenly, children: [
-              InkWell(
-                  onTap: () async {
-                    Navigator.push(
-                        context,
-                        PageTransition(
-                            child: ProO(user: organ,),
-                            type: PageTransitionType.rightToLeft,
-                            duration: Duration(milliseconds: 600)));
-                  },
-                  child: q(context, "assets/office-building-svgrepo-com.svg", "Organisation")),
-              InkWell(
-                  onTap: (){
-                    Navigator.push(
-                        context,
-                        PageTransition(
-                            child: TravelC(id: _user.source,),
-                            type: PageTransitionType.leftToRight,
-                            duration: Duration(milliseconds: 400)));
-                  },
-                  child: q(context, "assets/airplane-svgrepo-com.svg", "Travel")),
-            ]),
+                Row(mainAxisAlignment: MainAxisAlignment.spaceEvenly, children: [
+                  InkWell(
+                      onTap: () async {
+                        Navigator.push(
+                            context,
+                            PageTransition(
+                                child: ProO(user: organ,),
+                                type: PageTransitionType.rightToLeft,
+                                duration: Duration(milliseconds: 600)));
+                      },
+                      child: q(context, "assets/office-building-svgrepo-com.svg", "Organisation")),
+                  InkWell(
+                      onTap: (){
+                        Navigator.push(
+                            context,
+                            PageTransition(
+                                child: TravelC(id: _user.source,),
+                                type: PageTransitionType.leftToRight,
+                                duration: Duration(milliseconds: 400)));
+                      },
+                      child: q(context, "assets/airplane-svgrepo-com.svg", "Travel")),
+                ]),
                 w(),
-            Row(mainAxisAlignment: MainAxisAlignment.spaceEvenly, children: [
-              InkWell(
-                  onTap: (){
-                    Navigator.push(
-                        context,
-                        PageTransition(
-                            child: Notify(),
-                            type: PageTransitionType.leftToRight,
-                            duration: Duration(milliseconds: 400)));
-                  },
-                  child: q(context, "assets/announcement-shout-svgrepo-com.svg", "Notifications")),
-              InkWell(
-                  onTap: (){
-                    Navigator.push(
-                        context,
-                        PageTransition(
-                            child: ViewUsersAttendance(id: '', b: false, performance: true, user: organ,),
-                            type: PageTransitionType.rightToLeft,
-                            duration: Duration(milliseconds: 400)));
-                  },
-                  child: q(context, "assets/competition-award-svgrepo-com.svg", "Employee Performance")),
-            ]),
+                Row(mainAxisAlignment: MainAxisAlignment.spaceEvenly, children: [
+                  InkWell(
+                      onTap: (){
+                        Navigator.push(
+                            context,
+                            PageTransition(
+                                child: Notify(),
+                                type: PageTransitionType.leftToRight,
+                                duration: Duration(milliseconds: 400)));
+                      },
+                      child: q(context, "assets/announcement-shout-svgrepo-com.svg", "Notifications")),
+                  InkWell(
+                      onTap: (){
+                        Navigator.push(
+                            context,
+                            PageTransition(
+                                child: ViewUsersAttendance(id: '', b: false, performance: true, user: organ,),
+                                type: PageTransitionType.rightToLeft,
+                                duration: Duration(milliseconds: 400)));
+                      },
+                      child: q(context, "assets/competition-award-svgrepo-com.svg", "Employee Performance")),
+                ]),
                 w(),
-            Row(mainAxisAlignment: MainAxisAlignment.spaceEvenly, children: [
-              InkWell(
-                  onTap:() async {
-                    Navigator.push(
-                        context,
-                        PageTransition(
-                            child: Kpi(user: organ,),
-                            type: PageTransitionType.rightToLeft,
-                            duration: Duration(milliseconds: 600)));
-                    },
-                  child: q(context, "assets/factory-company-svgrepo-com.svg", "KPIs Metrics")),
-              InkWell(
-                  onTap: (){
-                    Navigator.push(
-                        context,
-                        PageTransition(
-                            child: Taskk(hr: true,),
-                            type: PageTransitionType.rightToLeft,
-                            duration: Duration(milliseconds: 600)));
-                  },
-                  child: q(context, "assets/time-complexity-svgrepo-com.svg", "Task")),
-            ]),
+                Row(mainAxisAlignment: MainAxisAlignment.spaceEvenly, children: [
+                  InkWell(
+                      onTap:() async {
+                        Navigator.push(
+                            context,
+                            PageTransition(
+                                child: Kpi(user: organ,),
+                                type: PageTransitionType.rightToLeft,
+                                duration: Duration(milliseconds: 600)));
+                      },
+                      child: q(context, "assets/factory-company-svgrepo-com.svg", "KPIs Metrics")),
+                  InkWell(
+                      onTap: (){
+                        Navigator.push(
+                            context,
+                            PageTransition(
+                                child: Taskk(hr: true,),
+                                type: PageTransitionType.rightToLeft,
+                                duration: Duration(milliseconds: 600)));
+                      },
+                      child: q(context, "assets/time-complexity-svgrepo-com.svg", "Task")),
+                ]),
                 w(),
-            Row(mainAxisAlignment: MainAxisAlignment.spaceEvenly, children: [
-              InkWell(
-                  onTap: (){
-                    Navigator.push(
-                        context,
-                        PageTransition(
-                            child: Approval(),
-                            type: PageTransitionType.leftToRight,
-                            duration: Duration(milliseconds: 400)));
-                  },
-                  child: q(context, "assets/calender-day-love-svgrepo-com.svg", "Cases")),
-              InkWell(
-                  onTap: () async {
-                    Navigator.push(
-                        context,
-                        PageTransition(
-                            child: LabourLaws(user: organ, hr: true,),
-                            type: PageTransitionType.leftToRight,
-                            duration: Duration(milliseconds: 400)));
-                  },
-                  child: q(context, "assets/briefcase-svgrepo-com.svg", "Legal Compilance")),
-            ]),
+                Row(mainAxisAlignment: MainAxisAlignment.spaceEvenly, children: [
+                  InkWell(
+                      onTap: (){
+                        Navigator.push(
+                            context,
+                            PageTransition(
+                                child: Approval(),
+                                type: PageTransitionType.leftToRight,
+                                duration: Duration(milliseconds: 400)));
+                      },
+                      child: q(context, "assets/calender-day-love-svgrepo-com.svg", "Cases")),
+                  InkWell(
+                      onTap: () async {
+                        Navigator.push(
+                            context,
+                            PageTransition(
+                                child: LabourLaws(user: organ, hr: true,),
+                                type: PageTransitionType.leftToRight,
+                                duration: Duration(milliseconds: 400)));
+                      },
+                      child: q(context, "assets/briefcase-svgrepo-com.svg", "Legal Compilance")),
+                ]),
                 w(),
               ]),
-        )):
-    Scaffold(
+        ));
+  }
+
+  Widget organisation(UserModel _user){
+    return  Scaffold(
+        body: SingleChildScrollView(
+          child: Column(
+              children: [
+                w(),
+                Row(mainAxisAlignment: MainAxisAlignment.spaceEvenly, children: [
+                  InkWell(
+                      onTap:(){
+                        print("rrukuli");
+                        Navigator.push(
+                            context,
+                            PageTransition(
+                                child: Jobh(hr: true,),
+                                type: PageTransitionType.rightToLeft,
+                                duration: Duration(milliseconds: 600)));
+                      },
+                      child: q(context, "assets/calender-day-love-svgrepo-com.svg", "Job Applicant")),
+                  InkWell(
+                      onTap:(){
+                        Navigator.push(
+                            context,
+                            PageTransition(
+                                child: ViewUsersAttendance(id: '', b: false, performance: false, user: organ,),
+                                type: PageTransitionType.rightToLeft,
+                                duration: Duration(milliseconds: 400)));
+                      },
+                      child: q(context, "assets/event-calender-date-note-svgrepo-com.svg", "Attendance")),
+                ]),
+                w(),
+                Row(mainAxisAlignment: MainAxisAlignment.spaceEvenly, children: [
+                  InkWell(
+                      onTap:(){
+                        Navigator.push(
+                            context,
+                            PageTransition(
+                                child: Shifts(id: 'shifts', user: organ,),
+                                type: PageTransitionType.rightToLeft,
+                                duration: Duration(milliseconds: 400)));
+                      },
+                      child: q(context, "assets/office-chair-svgrepo-com (1).svg", "Change Shifts")),
+                  InkWell(
+                      onTap:(){
+                        Navigator.push(
+                            context,
+                            PageTransition(
+                                child: ViewUsersAttendance(id: '', b: true, performance: false, user: organ,),
+                                type: PageTransitionType.rightToLeft,
+                                duration: Duration(milliseconds: 400)));
+                      },
+                      child: q(context, "assets/time-hourglass-svgrepo-com.svg", "Time Tracking")),
+                ]),
+                w(),
+                Row(mainAxisAlignment: MainAxisAlignment.spaceEvenly, children: [
+                  InkWell(
+                      onTap:() async {
+                        Navigator.push(
+                            context,
+                            PageTransition(
+                                child: Expense(user: organ,),
+                                type: PageTransitionType.rightToLeft,
+                                duration: Duration(milliseconds: 600)));
+                      },
+                      child: q(context, "assets/event-calender-date-note-svgrepo-com (1).svg", "Expense")),
+                  InkWell(
+                      onTap:(){
+                        Navigator.push(
+                            context,
+                            PageTransition(
+                                child: Payroll(user: organ,),
+                                type: PageTransitionType.rightToLeft,
+                                duration: Duration(milliseconds: 600)));
+                      },
+                      child: q(context, "assets/accounting-svgrepo-com.svg", "Payroll")),
+                ]),
+                w(),
+                Row(mainAxisAlignment: MainAxisAlignment.spaceEvenly, children: [
+                  InkWell(
+                      onTap: () async {
+                        Navigator.push(
+                            context,
+                            PageTransition(
+                                child: ProO(user: organ,),
+                                type: PageTransitionType.rightToLeft,
+                                duration: Duration(milliseconds: 600)));
+                      },
+                      child: q(context, "assets/office-building-svgrepo-com.svg", "Organisation")),
+                  InkWell(
+                      onTap: (){
+                        Navigator.push(
+                            context,
+                            PageTransition(
+                                child: TravelC(id: _user.source,),
+                                type: PageTransitionType.leftToRight,
+                                duration: Duration(milliseconds: 400)));
+                      },
+                      child: q(context, "assets/airplane-svgrepo-com.svg", "Travel")),
+                ]),
+                w(),
+                Row(mainAxisAlignment: MainAxisAlignment.spaceEvenly, children: [
+                  InkWell(
+                      onTap: (){
+                        Navigator.push(
+                            context,
+                            PageTransition(
+                                child: Notify(),
+                                type: PageTransitionType.leftToRight,
+                                duration: Duration(milliseconds: 400)));
+                      },
+                      child: q(context, "assets/announcement-shout-svgrepo-com.svg", "Notifications")),
+                  InkWell(
+                      onTap: (){
+                        Navigator.push(
+                            context,
+                            PageTransition(
+                                child: ViewUsersAttendance(id: '', b: false, performance: true, user: organ,),
+                                type: PageTransitionType.rightToLeft,
+                                duration: Duration(milliseconds: 400)));
+                      },
+                      child: q(context, "assets/competition-award-svgrepo-com.svg", "Employee Performance")),
+                ]),
+                w(),
+                Row(mainAxisAlignment: MainAxisAlignment.spaceEvenly, children: [
+                  InkWell(
+                      onTap:() async {
+                        Navigator.push(
+                            context,
+                            PageTransition(
+                                child: Kpi(user: organ,),
+                                type: PageTransitionType.rightToLeft,
+                                duration: Duration(milliseconds: 600)));
+                      },
+                      child: q(context, "assets/factory-company-svgrepo-com.svg", "KPIs Metrics")),
+                  InkWell(
+                      onTap: (){
+                        Navigator.push(
+                            context,
+                            PageTransition(
+                                child: Taskk(hr: true,),
+                                type: PageTransitionType.rightToLeft,
+                                duration: Duration(milliseconds: 600)));
+                      },
+                      child: q(context, "assets/time-complexity-svgrepo-com.svg", "Task")),
+                ]),
+                w(),
+                Row(mainAxisAlignment: MainAxisAlignment.spaceEvenly, children: [
+                  InkWell(
+                      onTap: (){
+                        Navigator.push(
+                            context,
+                            PageTransition(
+                                child: Approval(),
+                                type: PageTransitionType.leftToRight,
+                                duration: Duration(milliseconds: 400)));
+                      },
+                      child: q(context, "assets/calender-day-love-svgrepo-com.svg", "Cases")),
+                  InkWell(
+                      onTap: () async {
+                        Navigator.push(
+                            context,
+                            PageTransition(
+                                child: LabourLaws(user: organ, hr: true,),
+                                type: PageTransitionType.leftToRight,
+                                duration: Duration(milliseconds: 400)));
+                      },
+                      child: q(context, "assets/briefcase-svgrepo-com.svg", "Legal Compilance")),
+                ]),
+                w(),
+              ]),
+        ));
+  }
+
+  Widget indiv(UserModel _user){
+    return   Scaffold(
         body: SingleChildScrollView(
           child: Column(
               children: [
@@ -334,14 +552,14 @@ class _ServicesState extends State<Services> {
                 w(),
                 Row(mainAxisAlignment: MainAxisAlignment.spaceEvenly, children: [
                   InkWell(
-                    onTap:(){
-                      Navigator.push(
-                          context,
-                          PageTransition(
-                              child: My_Payroll(),
-                              type: PageTransitionType.rightToLeft,
-                              duration: Duration(milliseconds: 600)));
-                    },
+                      onTap:(){
+                        Navigator.push(
+                            context,
+                            PageTransition(
+                                child: My_Payroll(),
+                                type: PageTransitionType.rightToLeft,
+                                duration: Duration(milliseconds: 600)));
+                      },
                       child: q(context, "assets/money-svgrepo-com.svg", "My Payroll")),
                   InkWell(
                       onTap: (){
@@ -380,8 +598,7 @@ class _ServicesState extends State<Services> {
                 w(),
 
               ]),
-        ))):
-    Empty();
+        ));
   }
 
   Widget q(BuildContext context, String asset, String str) {

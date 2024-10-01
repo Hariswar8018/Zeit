@@ -68,9 +68,9 @@ class _PerformanceUState extends State<PerformanceU> {
     });
     setState(() {
       dataMap2 = {
-        "Leave": hy.toDouble(),
+        "Holiday": hy.toDouble(),
         "Present": hy1.toDouble(),
-        "Holiday": (30-hy1-hy).toDouble(),
+        "Leave": (30-hy1-hy).toDouble(),
         "Travel": 1,
       };
     });

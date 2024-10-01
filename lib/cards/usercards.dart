@@ -1,4 +1,5 @@
 import 'package:calendar_date_picker2/calendar_date_picker2.dart';
+import 'package:flutter/cupertino.dart';
 import 'package:flutter/material.dart';
 import 'package:intl/intl.dart';
 import 'package:page_transition/page_transition.dart';
@@ -6,9 +7,12 @@ import 'package:url_launcher/url_launcher.dart';
 import 'package:zeit/add/emp_history.dart';
 import 'package:zeit/cards/emphistory.dart';
 import 'package:zeit/cards/pdf.dart';
+import 'package:zeit/cards/task.dart';
 import 'package:zeit/fee_performance/transaction.dart';
 import 'package:zeit/model/emp_history.dart';
 import 'package:zeit/model/pay.dart';
+import 'package:zeit/services/files_see.dart';
+import 'package:zeit/services/messagecard.dart';
 import 'package:zeit/update/update_user.dart';
 
 import '../model/usermodel.dart';
@@ -30,8 +34,8 @@ import '../services/attendance.dart';
 
 
 class UserC extends StatefulWidget {
-  UserModel user ; bool b;
-  UserC({super.key, required this.user, this.b=false});
+  UserModel user ; bool b;bool message;
+  UserC({super.key, required this.user, this.b=false,this.message=false});
 
   @override
   State<UserC> createState() => _UserCState();
@@ -58,6 +62,42 @@ class _UserCState extends State<UserC> {
         actions: [
           IconButton(onPressed: (){}, icon: Icon(Icons.camera_alt)),
           SizedBox(width: 10,)
+        ],
+      ),
+      floatingActionButton: Row(
+        mainAxisAlignment: MainAxisAlignment.end,
+        children: [
+          InkWell(
+            onTap: (){
+              Navigator.push(
+                  context,
+                  PageTransition(
+                      child: AddS( title: '', userr: widget.user),
+                      type: PageTransitionType.rightToLeft,
+                      duration: Duration(milliseconds: 60)));
+            },
+            child: CircleAvatar(
+              radius: 30,
+              backgroundColor: Colors.blue,
+              child: Icon(Icons.upload_file_rounded,color: Colors.white,),
+            ),
+          ),
+          SizedBox(width: 8,),
+          InkWell(
+            onTap: (){
+              Navigator.push(
+                  context,
+                  PageTransition(
+                      child: ChatPage(user: widget.user,),
+                      type: PageTransitionType.rightToLeft,
+                      duration: Duration(milliseconds: 400)));
+            },
+            child: CircleAvatar(
+              radius: 30,
+              backgroundColor: Colors.blue,
+              child: Icon(CupertinoIcons.chat_bubble_2_fill,color: Colors.white,),
+            ),
+          ),
         ],
       ),
       body: SingleChildScrollView(
@@ -127,6 +167,7 @@ class _UserCState extends State<UserC> {
       ),
     );
   }
+
   Widget other(){
     String s = FirebaseAuth.instance.currentUser!.uid;
     return Container(
@@ -276,6 +317,7 @@ class _UserCState extends State<UserC> {
       )
     );
   }
+
   Widget mwnu(int i){
     if(widget.b&&i==0){
       return r1();
@@ -369,7 +411,7 @@ class _UserCState extends State<UserC> {
         ),
       );
   } else if(i==6){
-      List<PayModel> _list = [];
+      List<FileModel> _list = [];
       return  Container(
         height : 200,
         child: widget.user.source==""?Center(
@@ -389,10 +431,11 @@ class _UserCState extends State<UserC> {
               SizedBox(height: 10),
             ],
           ),
-        ):StreamBuilder(
+        ):
+        StreamBuilder(
           stream: FirebaseFirestore.instance
-              .collection('Company')
-              .doc(widget.user.source).collection("Payroll").where("type",isEqualTo: FirebaseAuth.instance.currentUser!.uid)
+              .collection('Users')
+              .doc(widget.user.uid).collection("Files")
               .snapshots(),
           builder: (context, snapshot) {
             if (snapshot.connectionState == ConnectionState.waiting) {
@@ -426,13 +469,26 @@ class _UserCState extends State<UserC> {
             final data = snapshot.data?.docs;
             _list.clear();
             _list.addAll(data?.map((e) =>
-                PayModel.fromJson(e.data())).toList() ?? []);
+                FileModel.fromJson(e.data())).toList() ?? []);
+            return GridView.builder(
+              itemCount: _list.length,
+              padding: EdgeInsets.only(top: 10),
+              physics: BouncingScrollPhysics(),
+              gridDelegate: SliverGridDelegateWithFixedCrossAxisCount(
+                crossAxisCount: 2, // Number of columns
+                crossAxisSpacing: 5.0, // Space between columns
+                mainAxisSpacing: 5.0, // Space between rows
+              ),
+              itemBuilder: (context, index) {
+                return FileUser(user: _list[index]);
+              },
+            );
             return ListView.builder(
               itemCount: _list.length,
               padding: EdgeInsets.only(top: 10),
               physics: BouncingScrollPhysics(),
               itemBuilder: (context, index) {
-                return Per(user: _list[index],id:"NO" );
+                return FileUser(user: _list[index]);
               },
             );
           },

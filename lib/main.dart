@@ -59,10 +59,7 @@ class Splash extends StatefulWidget {
 class _SplashState extends State<Splash> {
   FlutterLocalNotificationsPlugin flutterLocalNotificationsPlugin = FlutterLocalNotificationsPlugin();
 
-  @override
-  void initState() {
-    super.initState();
-
+  void fg() async{
     const AndroidInitializationSettings initializationSettingsAndroid =
     AndroidInitializationSettings('@mipmap/ic_launcher');
 
@@ -93,18 +90,27 @@ class _SplashState extends State<Splash> {
       }
     });
 
+  }
 
+
+  void  hj()async{
+    await FirebaseAuth.instance.signOut();
+  }
+  @override
+  void initState() {
+    super.initState();
+    fg();
     Timer(Duration(seconds: 3), () async {
       User? user = FirebaseAuth.instance.currentUser;
       if (user == null) {
         Navigator.pushReplacement(
             context, MaterialPageRoute(builder: (context) => TestScreen()));
       } else {
-        final FirebaseMessaging _firebaseMessaging = FirebaseMessaging.instance;
+
         try {
+          final FirebaseMessaging _firebaseMessaging = FirebaseMessaging.instance;
           CollectionReference collection =
           FirebaseFirestore.instance.collection('Users');
-
           FirebaseMessaging.onBackgroundMessage(
               _firebaseMessagingBackgroundHandler);
           String? token = await _firebaseMessaging.getToken();
@@ -113,7 +119,9 @@ class _SplashState extends State<Splash> {
             await collection.doc(user.uid).update({
               'token': token,
             });
+            _firebaseMessaging.requestPermission();
           }
+
         } catch (e) {
           print(e);
         }
@@ -123,7 +131,7 @@ class _SplashState extends State<Splash> {
                 builder: (context) => MyHomePage(
                   title: 'Home',
                 )));
-        _firebaseMessaging.requestPermission();
+
       }
     });
   }
